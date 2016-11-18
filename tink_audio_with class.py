@@ -9,11 +9,11 @@ WINDOW_HEIGHT = 100
 
 LENGTH_OF_TRACK = 1
 SAMPLE_LENGTH = 44100 * LENGTH_OF_TRACK
-FREQUENCY = float(200)
+FREQUENCY = float(1000)
 SAMPLE_RATE = float(44100)
 BIT_DEPTH = 32767           # 2 to the power (16 - 1 for sign) -1 for zero
 
-volume = 0
+volume = 0.5
 
 values = []
 
@@ -54,15 +54,26 @@ def mmmMMM():
         values.append(packed_value)
         print packed_value
 
-# create instance of Sound class
-noise_out = Sound()
+def noise():
+    for i in xrange(0,SAMPLE_LENGTH):
+        value_1 = math.sin(math.pi * FREQUENCY * (i / float(44100))) + math.sin(
+            math.pi / float(1.01) * FREQUENCY * (i / float(44100)))
+        value = (value_1 * (volume * 32000))
+        packed_value = struct.pack('<h', value)
+        values.append(packed_value)
+        print packed_value
 
-controls = {'m': (mmmMMM, "mmmMMM")}
+# create instance of Sound class
+
+controls = {'m': (mmmMMM, "mmmMMM"),
+            'n': (noise, "noise")}
 for letters in controls:
     print letters + " makes a sound go " + controls[letters][1]
 
-
+noise_out = Sound()
 while True:
+
+
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
@@ -81,14 +92,13 @@ while True:
                 noise_out.write_file(values)
 
                 print 'now play'
-
+                del noise_out
                 winsound.PlaySound('noise_with_class.wav', winsound.SND_FILENAME)
-
                 # or with pygame
                 # can't get this to work?
 #                mmm_sound = pygame.mixer.Sound('noise_with_class.wav')
 #                mmm_sound.play()
-
+                noise_out = Sound()
                 print 'It will only let you do it once'
 
 
