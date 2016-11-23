@@ -43,6 +43,7 @@ class Sound:
 
 
 def mmmMMM():
+    """doc string"""
     for i in xrange(0, SAMPLE_LENGTH):
         base_sound_wave_value = math.sin(2.0 * math.pi * FREQUENCY * (i / SAMPLE_RATE))
 
@@ -54,7 +55,9 @@ def mmmMMM():
         values.append(packed_value)
         print packed_value
 
+
 def noise():
+    """doc string"""
     for i in xrange(0,SAMPLE_LENGTH):
         value_1 = math.sin(math.pi * FREQUENCY * (i / float(44100))) + math.sin(
             math.pi / float(1.01) * FREQUENCY * (i / float(44100)))
@@ -68,11 +71,12 @@ def noise():
 controls = {'m': (mmmMMM, "mmmMMM"),
             'n': (noise, "noise")}
 for letters in controls:
-    print letters + " makes a sound go " + controls[letters][1]
+    print letters + " makes a sound like " + controls[letters][1]
 
 noise_out = Sound()
-while True:
 
+
+while True:
 
     for event in pygame.event.get():
         if event.type == QUIT:
@@ -99,7 +103,6 @@ while True:
 #                mmm_sound = pygame.mixer.Sound('noise_with_class.wav')
 #                mmm_sound.play()
                 noise_out = Sound()
-                print 'It will only let you do it once'
 
 
 
