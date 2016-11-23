@@ -4,8 +4,8 @@ from pygame.locals import *
 pygame.init()
 pygame.mixer.init()
 
-WINDOW_WIDTH = 300
-WINDOW_HEIGHT = 100
+WINDOW_WIDTH = 800
+WINDOW_HEIGHT = 600
 
 LENGTH_OF_TRACK = 1
 SAMPLE_LENGTH = 44100 * LENGTH_OF_TRACK
@@ -58,10 +58,11 @@ def noise():
     for i in xrange(0,SAMPLE_LENGTH):
         value_1 = math.sin(math.pi * FREQUENCY * (i / float(44100))) + math.sin(
             math.pi / float(1.01) * FREQUENCY * (i / float(44100)))
-        value = (value_1 * (volume * 32000))
+        value = (value_1 * (volume * BIT_DEPTH))
         packed_value = struct.pack('<h', value)
         values.append(packed_value)
         print packed_value
+
 
 # create instance of Sound class
 
@@ -88,9 +89,8 @@ while True:
                 command()
 
                 # sets parameters and writes newly made value_string as sound wave
-                noise_out.set_parameters(1, 2, 44100, 132300, 'NONE', 'not compressed')
+                noise_out.set_parameters(2, 2, 44100, 132300, 'NONE', 'not compressed')
                 noise_out.write_file(values)
-
                 print 'now play'
                 del noise_out
                 winsound.PlaySound('noise_with_class.wav', winsound.SND_FILENAME)
@@ -100,6 +100,8 @@ while True:
 #                mmm_sound.play()
                 noise_out = Sound()
                 print 'It will only let you do it once'
+
+    pygame.display.update()
 
 
 
