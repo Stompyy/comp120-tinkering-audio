@@ -28,7 +28,7 @@ pygame.display.update()
 class Sound:
     def __init__(self):
         """creates the file"""
-        self.file = wave.open('noise_with_class.wav', 'w')
+        self.file = wave.open('noise_with_class2.wav', 'w')
 
     def set_parameters(self, nchannels, sampwidth, framerate, nframes, comptype, compname):
         """sets the parameters of the .wav file"""
