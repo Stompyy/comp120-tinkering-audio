@@ -4,8 +4,8 @@ from pygame.locals import *
 pygame.init()
 pygame.mixer.init()
 
-WINDOW_WIDTH = 800
-WINDOW_HEIGHT = 600
+WINDOW_WIDTH = 300
+WINDOW_HEIGHT = 100
 
 LENGTH_OF_TRACK = 1
 SAMPLE_LENGTH = 44100 * LENGTH_OF_TRACK
@@ -66,11 +66,11 @@ def noise():
             math.pi / float(1.01) * FREQUENCY * (i / float(44100)))
         value = (value_1 * (volume * BIT_DEPTH))
         list1.append(value)
+        value = (value_1 * (volume * 32000))
         packed_value = struct.pack('<h', value)
         values.append(packed_value)
     return list1
 
-noise_out = Sound()
 def echo():
     echolist = noise()
     counter = 0
@@ -86,7 +86,7 @@ def echo():
         values.append(packed_value)
 
 # create instance of Sound class
-
+noise_out = Sound()
 controls = {'m': (mmmMMM, "mmmMMM"),
             'n': (noise, "noise"),
             'p': (echo, "mmmMMM")}
@@ -115,8 +115,9 @@ while True:
                 command()
 
                 # sets parameters and writes newly made value_string as sound wave
-                noise_out.set_parameters(2, 2, 44100, 132300, 'NONE', 'not compressed')
+                noise_out.set_parameters(1, 2, 44100, 132300, 'NONE', 'not compressed')
                 noise_out.write_file(values)
+
                 print 'now play'
                 del noise_out
                 winsound.PlaySound('noise_with_class.wav', winsound.SND_FILENAME)
@@ -125,56 +126,3 @@ while True:
 #                mmm_sound = pygame.mixer.Sound('noise_with_class.wav')
 #                mmm_sound.play()
                 noise_out = Sound()
-
-    pygame.display.update()
-
-
-
-
-
-
-
-
-"""
-def change_volume(current_amplitude, volume_level):
-    new_amplitude = current_amplitude * volume_level
-    return new_amplitude
-
-
-for i in range(audio.getnframes()-1):
-    frame = audio.readframes(1)
-    #print 'hello'
-    answer = struct.unpack("<h", frame)
-    list.append(answer)
-
-    if answer > max_amplitude:
-        max_amplitude = answer
-        peak_one = i
-
-    if answer < min_amplitude:
-        min_amplitude = answer
-        trough_one = i
-        #if peak_one != 10:
-         #   wavelength = (peak_one - trough_one) * 2
-          #  print wavelength
-
-    #print answer
-
-    #change_volume(answer, volume)
-
-    #print max_amplitude, min_amplitude
-
-while True:
-
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
-
-#    for i in xrange(list.__len__()):
- #       print 'yo'
-  #      window.fill((255, 255, 255))
-   #    pygame.draw.rect(window, (100, 100, 100), (50, 50, int(list[i][0]), list[i][0]), 0)
-    #   pygame.display.update()
-
-"""
