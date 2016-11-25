@@ -40,7 +40,16 @@ class Sound:
         """takes the list of newly created values, joins, writes to the file, then closes the wave stream"""
         self.file.writeframes(''.join(values_list))
         self.file.close()
-
+    def unpack(self):
+        frames = self.file.getnframes()
+        print frames
+        list2 = []
+        for i in xrange(10):
+            foo = self.file.readframes(1)
+            current_frame = (int(struct.unpack("<h",foo)[0]))
+            print current_frame
+            list2.append(current_frame)
+        return list2
 
 def mmmMMM():
     """doc string"""
@@ -72,8 +81,9 @@ def noise():
     return list1
 
 def echo():
-    echolist = noise()
+    echolist = noise_out.unpack()
     counter = 0
+    print echolist
     for i in echolist:
         counter +=1
         if i <1000:
