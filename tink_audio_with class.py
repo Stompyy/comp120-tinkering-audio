@@ -42,8 +42,30 @@ class Sound:
         self.file.close()
 
 
+def echo():
+
+    sound_list_unpacked_to_echo = mmmMMM()
+    new_list_unpacked_with_echo = []
+    echo_length = 1000
+
+    for i in xrange(0, SAMPLE_LENGTH -1):
+        if i < echo_length:
+            new_list_unpacked_with_echo.append(sound_list_unpacked_to_echo[i])
+        else:
+            new_list_unpacked_with_echo.append(sound_list_unpacked_to_echo[i] + sound_list_unpacked_to_echo[i-echo_length] * 0.6)
+        if new_list_unpacked_with_echo[i] > BIT_DEPTH:
+            new_list_unpacked_with_echo[i] = BIT_DEPTH
+        packed_value = struct.pack('<h', new_list_unpacked_with_echo[i])
+        values.append(packed_value)
+    print values
+    noise_out.write_file(values)
+    winsound.PlaySound('noise_with_class.wav', winsound.SND_FILENAME)
+
+
 def mmmMMM():
     """doc string"""
+    unpacked_values_list_for_echo = []
+
     for i in xrange(0, SAMPLE_LENGTH):
         base_sound_wave_value = math.sin(2.0 * math.pi * FREQUENCY * (i / SAMPLE_RATE))
 
@@ -51,9 +73,13 @@ def mmmMMM():
         # volume = i / SAMPLE_LENGTH increases volume over time. #leetfx
         value = base_sound_wave_value * BIT_DEPTH * i / SAMPLE_LENGTH
 
+        unpacked_values_list_for_echo.append(value)
+
         packed_value = struct.pack('<h', value)
         values.append(packed_value)
         print packed_value
+
+    return unpacked_values_list_for_echo
 
 
 def noise():
@@ -75,6 +101,7 @@ for letters in controls:
 
 noise_out = Sound()
 
+echo()
 
 while True:
 
@@ -92,7 +119,7 @@ while True:
                 command()
 
                 # sets parameters and writes newly made value_string as sound wave
-                noise_out.set_parameters(1, 2, 44100, 132300, 'NONE', 'not compressed')
+                noise_out.set_parameters(2, 2, 44100, 132300, 'NONE', 'not compressed')
                 noise_out.write_file(values)
 
                 print 'now play'
@@ -103,3 +130,4 @@ while True:
 #                mmm_sound = pygame.mixer.Sound('noise_with_class.wav')
 #                mmm_sound.play()
                 noise_out = Sound()
+                noise_out.set_parameters(2, 2, 44100, 132300, 'NONE', 'not compressed')
