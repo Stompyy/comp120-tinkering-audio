@@ -64,44 +64,65 @@ def echo():
 
 def mmmMMM():
     """doc string"""
-    unpacked_values_list_for_echo = []
-
+    list1 = []
     for i in xrange(0, SAMPLE_LENGTH):
         base_sound_wave_value = math.sin(2.0 * math.pi * FREQUENCY * (i / SAMPLE_RATE))
 
         # takes base value and brings up to correct BIT_DEPTH * volume
         # volume = i / SAMPLE_LENGTH increases volume over time. #leetfx
         value = base_sound_wave_value * BIT_DEPTH * i / SAMPLE_LENGTH
-
+        list1.append(value)
         unpacked_values_list_for_echo.append(value)
 
         packed_value = struct.pack('<h', value)
         values.append(packed_value)
         print packed_value
+    return list1
 
     return unpacked_values_list_for_echo
 
 
 def noise():
     """doc string"""
+    list1 = []
     for i in xrange(0,SAMPLE_LENGTH):
         value_1 = math.sin(math.pi * FREQUENCY * (i / float(44100))) + math.sin(
             math.pi / float(1.01) * FREQUENCY * (i / float(44100)))
+        value = (value_1 * (volume * BIT_DEPTH))
+        list1.append(value)
         value = (value_1 * (volume * 32000))
         packed_value = struct.pack('<h', value)
         values.append(packed_value)
-        print packed_value
+    return list1
+
+def echo():
+    echolist = noise()
+    counter = 0
+    for i in echolist:
+        counter +=1
+        if i <1000:
+            value = i
+        else:
+            value = i + (echolist[counter-1000]*0.8)
+        if value > 32000:
+            value = 32000
+        packed_value = struct.pack('<h', value)
+        values.append(packed_value)
 
 # create instance of Sound class
-
+noise_out = Sound()
 controls = {'m': (mmmMMM, "mmmMMM"),
-            'n': (noise, "noise")}
+            'n': (noise, "noise"),
+            'p': (echo, "mmmMMM")}
 for letters in controls:
     print letters + " makes a sound like " + controls[letters][1]
 
-noise_out = Sound()
 
 echo()
+
+
+
+
 
 while True:
 
