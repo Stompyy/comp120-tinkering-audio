@@ -12,6 +12,7 @@ SAMPLE_LENGTH = 44100 * LENGTH_OF_TRACK
 FREQUENCY = float(1000)
 SAMPLE_RATE = float(44100)
 BIT_DEPTH = 32767           # 2 to the power (16 - 1 for sign) -1 for zero
+load_file = False
 
 volume = 0.5
 
@@ -28,7 +29,10 @@ pygame.display.update()
 class Sound:
     def __init__(self):
         """creates the file"""
-        self.file = wave.open('noise_with_class.wav', 'w')
+        if load_file:
+            self.file = wave.open("gunshot.wav", "r")
+        else:
+            self.file = wave.open('noise_with_class.wav', 'w')
 
     def set_parameters(self, nchannels, sampwidth, framerate, nframes, comptype, compname):
         """sets the parameters of the .wav file"""
@@ -36,10 +40,28 @@ class Sound:
         # probably unnecessary to have in a function. Just do after creating an instance
         self.file.setparams((nchannels, sampwidth, framerate, nframes, comptype, compname))
 
+    def get_parameters(self):
+        """again definitely not needed, just my train of thought"""
+        self.file.getparams()
+
     def write_file(self, values_list):
         """takes the list of newly created values, joins, writes to the file, then closes the wave stream"""
         self.file.writeframes(''.join(values_list))
         self.file.close()
+
+    def read_file(self):
+
+        packed_list = []
+
+        for i in xrange(self.file.getnframes()):
+            current_frame = self.file.readframes(1)
+            unpacked_frame = struct.unpack("<h", current_frame)
+
+            # do something
+
+            packed_list.append(struct.pack("<h", unpacked_frame))
+
+        self.write_file(packed_list)
 
 
 def echo():
