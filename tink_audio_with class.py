@@ -12,7 +12,7 @@ SAMPLE_LENGTH = 44100 * LENGTH_OF_TRACK
 FREQUENCY = float(1000)
 SAMPLE_RATE = float(44100)
 BIT_DEPTH = 32767           # 2 to the power (16 - 1 for sign) -1 for zero
-load_file = False
+load_file = True
 
 volume = 0.5
 
@@ -30,7 +30,7 @@ class Sound:
     def __init__(self):
         """creates the file"""
         if load_file:
-            self.file = wave.open("gunshot.wav", "r")
+            self.file = wave.open("gunshot2.wav", "rb")
         else:
             self.file = wave.open('noise_with_class.wav', 'w')
 
@@ -52,16 +52,26 @@ class Sound:
     def read_file(self):
 
         packed_list = []
+        step = BIT_DEPTH / 200  # auto tune step
 
         for i in xrange(self.file.getnframes()):
             current_frame = self.file.readframes(1)
-            unpacked_frame = struct.unpack("<h", current_frame)
+            unpacked_frame = struct.unpack("<hh", current_frame)
 
             # do something
+            # print unpacked_frame
 
-            packed_list.append(struct.pack("<h", unpacked_frame))
+            unpacked_frame = float(abs(int(unpacked_frame[0] / step)))
+            print unpacked_frame
+
+            packed_list.append(struct.pack("<h", unpacked_frame)) #[0])) , unpacked_frame[1]))
+
+        self.file = wave.open('gunshot_bellos.wav', 'w')
+        self.set_parameters(2, 2, 44100, 132300, 'NONE', 'not compressed')
 
         self.write_file(packed_list)
+
+        print 'woop'
 
 
 def echo():
@@ -140,9 +150,9 @@ for letters in controls:
     print letters + " makes a sound like " + controls[letters][1]
 
 
-echo()
 
 
+noise_out.read_file()
 
 
 
