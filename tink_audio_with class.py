@@ -113,21 +113,21 @@ class CreateSound(Sound):
         # probably unnecessary to have in a function. Just do after creating an instance
         self.file.setparams((nchannels, sampwidth, framerate, nframes, comptype, compname))
 
-    def sound_envelope(self, max_volume, frequency):
+    def sound_envelope(self, frequency, attack_time, sustain_time, release_time ):
         new_values_list = []
-        attack_time = 0.05 * SAMPLE_RATE
-        sustain_time = 0.1 * SAMPLE_RATE
-        release_time = 0.2 * SAMPLE_RATE
-        total_time = attack_time + sustain_time + release_time
+        attack_frames = attack_time * SAMPLE_RATE
+        sustain_frames = sustain_time * SAMPLE_RATE
+        release_frames = release_time * SAMPLE_RATE
+        total_frames = attack_frames + sustain_frames + release_frames
         current_volume = 0.0
 
-        for frame in xrange(int(total_time)):
-            if frame < attack_time:
-                current_volume += max_volume / attack_time
-            elif frame > attack_time + sustain_time:
-                current_volume -= max_volume / release_time
+        for frame in xrange(int(total_frames)):
+            if frame < attack_frames:
+                current_volume += BIT_DEPTH / attack_frames   # BIT_DEPTH is max volume
+            elif frame > attack_frames + sustain_frames:
+                current_volume -= BIT_DEPTH / release_frames
             else:
-                current_volume = max_volume
+                current_volume = BIT_DEPTH
 
             pure_tone_frame = math.sin(frame * frequency / SAMPLE_RATE) * current_volume * 2.0 * math.pi
             new_values_list.append(struct.pack("<h", clamp(pure_tone_frame)))
@@ -137,18 +137,22 @@ class CreateSound(Sound):
     def play_scale(self):
         scale = ['A', 'Bb', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
         for note in scale:
-            self.sound_envelope(BIT_DEPTH, notes[note])
+            self.sound_envelope(notes[note], 0.1, 0.1, 0.1)
 
     def wonderwall(self):
         wonderwall = ['E', 'E', 'G', 'G', 'D', 'D', 'A', 'A']
         for note in wonderwall:
-            self.sound_envelope(BIT_DEPTH, notes[note])
+            self.sound_envelope(notes[note], 0.1, 0.2, 0.3)
 
     def come_as_you_are(self):
         come_as_you_are = ['E', 'E', 'F', 'F#', 'F#', 'A', 'F#', 'A', 'F#', 'F#', 'F', 'E', 'E', 'B', 'E', 'B']
         for note in come_as_you_are:
-            self.sound_envelope(BIT_DEPTH, notes[note])
+            self.sound_envelope(notes[note], 0.05, 0.1, 0.2)
 
+    def new_song(self):
+        new_song = ['G', 'F#', 'F', 'E', 'G', 'F#', 'F', 'E', 'G', 'F#', 'F', 'E', 'G', 'F#', 'F', 'E',]
+        for note in new_song:
+            self.sound_envelope(notes[note], 0.02, 0.03, 0.08)
 
 def mmmMMM():
     """doc string"""
@@ -212,8 +216,12 @@ winsound.PlaySound('wonderecho.wav', winsound.SND_FILENAME)
 nirvana = CreateSound('comeasyouare.wav')
 nirvana.set_parameters(1, 2, 44100, 132300, 'NONE', 'not compressed')
 nirvana.come_as_you_are()
-winsound.PlaySound('comeasyouare.wav', winsound.SND_FILENAME)
+#winsound.PlaySound('comeasyouare.wav', winsound.SND_FILENAME)
 
+new_song = CreateSound('new_song.wav')
+new_song.set_parameters(1, 2, 44100, 132300, 'NONE', 'not compressed')
+new_song.new_song()
+winsound.PlaySound('new_song.wav', winsound.SND_FILENAME)
 
 
 #gun = LoadSound("gunshot2.wav")
