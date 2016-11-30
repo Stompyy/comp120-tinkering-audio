@@ -26,10 +26,25 @@ levelText = font.render('m = mmmMMM', True, (0, 0, 0))
 window.blit(levelText, (0, 0))
 pygame.display.update()
 
+notes = {'A' : 440 * math.pow(2, 0.0/12.0),
+         'Bb': 440 * math.pow(2, 1.0/12.0),
+         'B' : 440 * math.pow(2, 2.0/12.0),
+         'C' : 440 * math.pow(2, 3.0/12.0),
+         'C#': 440 * math.pow(2, 4.0/12.0),
+         'D' : 440 * math.pow(2, 5.0/12.0),
+         'D#': 440 * math.pow(2, 6.0/12.0),
+         'E' : 440 * math.pow(2, 7.0/12.0),
+         'F' : 440 * math.pow(2, 8.0/12.0),
+         'F#': 440 * math.pow(2, 9.0/12.0),
+         'G' : 440 * math.pow(2, 10.0/12.0),
+         'G#': 440 * math.pow(2, 11.0/12.0)}
+
 
 def clamp(value):
     if value > BIT_DEPTH:
         clamped_value = BIT_DEPTH
+    elif value < - BIT_DEPTH:
+        clamped_value = -BIT_DEPTH
     else:
         clamped_value = value
     return clamped_value
@@ -40,7 +55,7 @@ class Sound:
     def write_file(self, new_file_name, values_list):
         packed_list = []
         self.file = wave.open(new_file_name, 'w')
-        self.file.setparams((1, 1, 44100, 132300, 'NONE', 'not compressed'))
+        self.file.setparams((1, 2, 44100, 132300, 'NONE', 'not compressed'))
 
         for i in xrange(self.file.getnframes()-1):
             packed_list.append(struct.pack("<h", int(values_list[i])))  # [0])) , unpacked_frame[1]))
@@ -52,7 +67,7 @@ class Sound:
 class LoadSound(Sound):
     def __init__(self, name):
         """loads the file"""
-        self.file = wave.open(name, "rb")
+        self.file = wave.open(name, "r")
         print self.file.getnchannels()
 
     def read_file(self):
@@ -62,7 +77,7 @@ class LoadSound(Sound):
 
         for i in xrange(self.file.getnframes()):
             current_frame = self.file.readframes(1)
-            unpacked_frame = struct.unpack("<i", current_frame)
+            unpacked_frame = struct.unpack("<h", current_frame)
             unpacked_list.append(unpacked_frame[0])
 
         print unpacked_list
@@ -100,7 +115,36 @@ class CreateSound(Sound):
         # probably unnecessary to have in a function. Just do after creating an instance
         self.file.setparams((nchannels, sampwidth, framerate, nframes, comptype, compname))
 
+    def sound_envelope(self, max_volume, frequency):
+        new_values_list = []
+        attack_time = 0.1 * SAMPLE_RATE
+        sustain_time = 0.3 * SAMPLE_RATE
+        release_time = 0.4 * SAMPLE_RATE
+        total_time = attack_time + sustain_time + release_time
+        current_volume = 0.0
 
+        for frame in xrange(int(total_time)):
+            if frame < attack_time:
+                current_volume += max_volume / attack_time
+            elif frame > attack_time + sustain_time:
+                current_volume -= max_volume / release_time
+            else:
+                current_volume = max_volume
+
+            pure_tone_frame = math.sin(frame * frequency / SAMPLE_RATE) * current_volume * 2.0 * math.pi
+            new_values_list.append(struct.pack("<h", clamp(pure_tone_frame)))
+
+        self.file.writeframes(''.join(new_values_list))
+
+    def play_scale(self):
+        scale = ['A', 'Bb', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
+        for note in scale:
+            self.sound_envelope(BIT_DEPTH, notes[note])
+
+    def wonderwall(self):
+        wonderwall = ['E', 'E', 'G', 'G', 'D', 'D', 'A', 'A']
+        for note in wonderwall:
+            self.sound_envelope(BIT_DEPTH, notes[note])
 
 
 def mmmMMM():
@@ -119,8 +163,6 @@ def mmmMMM():
         values.append(packed_value)
         print packed_value
     return list1
-
-    return unpacked_values_list_for_echo
 
 
 def noise():
@@ -160,8 +202,14 @@ for letters in controls:
 
 
 'create instance of sound'
-gun = LoadSound("gunshot2.wav")
-gun.write_file("gun3.wav", gun.read_file())
+# gun = LoadSound("gunshot2.wav")
+# gun.write_file("gun3.wav", gun.read_file())
+
+
+scale = CreateSound('scale.wav')
+scale.set_parameters(1, 2, 44100, 132300, 'NONE', 'not compressed')
+scale.wonderwall()
+winsound.PlaySound('scale.wav', winsound.SND_FILENAME)
 
 
 
