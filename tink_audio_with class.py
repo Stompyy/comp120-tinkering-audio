@@ -17,6 +17,7 @@ load_file = True
 volume = 0.5
 
 values = []
+new_file_frames = 132300
 
 window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 window.fill((255, 255, 255))
@@ -35,34 +36,34 @@ class LoadSound:
         """again definitely not needed, just my train of thought"""
         self.file.getparams()
 
-    def write_file(self, values_list):
-        """takes the list of newly created values, joins, writes to the file, then closes the wave stream"""
-        self.file.writeframes(''.join(values_list))
-        self.file.close()
-
     def read_file(self):
-
-        packed_list = []
+        """returns an unpacked list of values of the sound wave"""
+        unpacked_list = []
         step = BIT_DEPTH / 200  # auto tune step
 
         for i in xrange(self.file.getnframes()):
             current_frame = self.file.readframes(1)
             unpacked_frame = struct.unpack("<hh", current_frame)
+            unpacked_list.append(unpacked_frame)
 
-            # do something
-            # print unpacked_frame
+        return unpacked_list
 
-            unpacked_frame = step * abs(unpacked_frame[0] / step)
-            print unpacked_frame
+#            unpacked_frame = step * abs(unpacked_frame[0] / step)
+#            print unpacked_frame
 
-            packed_list.append(struct.pack("<h", unpacked_frame)) #[0])) , unpacked_frame[1]))
-
-        self.file = wave.open('gunshot_new.wav', 'w')
+    def write_file(self, new_file_name, values_list):
+        packed_list = []
+        self.file = wave.open(new_file_name, 'w')
         self.set_parameters(2, 2, 44100, 132300, 'NONE', 'not compressed')
 
-        self.write_file(packed_list)
+        for i in xrange(new_file_frames):
+            packed_list.append(struct.pack("<h", values_list[i]))  # [0])) , unpacked_frame[1]))
+
+        self.file.writeframes(''.join(packed_list))
+        self.file.close()
 
         print 'new sound made'
+        """takes the list of newly created values, joins, writes to the file, then closes the wave stream"""
 
 
 class CreateSound:
