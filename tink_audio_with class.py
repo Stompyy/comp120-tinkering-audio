@@ -26,19 +26,10 @@ window.blit(levelText, (0, 0))
 pygame.display.update()
 
 
-class Sound:
-    def __init__(self):
-        """creates the file"""
-        if load_file:
-            self.file = wave.open("gunshot2.wav", "rb")
-        else:
-            self.file = wave.open('noise_with_class.wav', 'w')
-
-    def set_parameters(self, nchannels, sampwidth, framerate, nframes, comptype, compname):
-        """sets the parameters of the .wav file"""
-
-        # probably unnecessary to have in a function. Just do after creating an instance
-        self.file.setparams((nchannels, sampwidth, framerate, nframes, comptype, compname))
+class LoadSound:
+    def __init__(self, name):
+        """loads the file"""
+        self.file = wave.open(name, "rb")
 
     def get_parameters(self):
         """again definitely not needed, just my train of thought"""
@@ -61,17 +52,31 @@ class Sound:
             # do something
             # print unpacked_frame
 
-            unpacked_frame = float(abs(int(unpacked_frame[0] / step)))
+            unpacked_frame = step * abs(unpacked_frame[0] / step)
             print unpacked_frame
 
             packed_list.append(struct.pack("<h", unpacked_frame)) #[0])) , unpacked_frame[1]))
 
-        self.file = wave.open('gunshot_bellos.wav', 'w')
+        self.file = wave.open('gunshot_new.wav', 'w')
         self.set_parameters(2, 2, 44100, 132300, 'NONE', 'not compressed')
 
         self.write_file(packed_list)
 
-        print 'woop'
+        print 'new sound made'
+
+
+class CreateSound:
+    """Creates a file with name 'name' """
+    def __init__(self, name):
+        self.file = wave.open(name, 'w')
+
+    def set_parameters(self, nchannels, sampwidth, framerate, nframes, comptype, compname):
+        """sets the parameters of the .wav file"""
+
+        # probably unnecessary to have in a function. Just do after creating an instance
+        self.file.setparams((nchannels, sampwidth, framerate, nframes, comptype, compname))
+
+
 
 
 def echo():
@@ -127,7 +132,8 @@ def noise():
         values.append(packed_value)
     return list1
 
-def echo():
+
+def echo_two():
     echolist = noise()
     counter = 0
     for i in echolist:
@@ -141,8 +147,7 @@ def echo():
         packed_value = struct.pack('<h', value)
         values.append(packed_value)
 
-# create instance of Sound class
-noise_out = Sound()
+
 controls = {'m': (mmmMMM, "mmmMMM"),
             'n': (noise, "noise"),
             'p': (echo, "mmmMMM")}
@@ -150,9 +155,10 @@ for letters in controls:
     print letters + " makes a sound like " + controls[letters][1]
 
 
+'create instance of sound'
+load_noise = LoadSound("gunshot2.wav")
+create_noise = CreateSound('noise_with_class.wav')
 
-
-noise_out.read_file()
 
 
 
