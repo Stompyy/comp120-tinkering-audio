@@ -27,14 +27,36 @@ window.blit(levelText, (0, 0))
 pygame.display.update()
 
 
-class LoadSound:
+def clamp(value):
+    if value > BIT_DEPTH:
+        clamped_value = BIT_DEPTH
+    else:
+        clamped_value = value
+    return clamped_value
+
+
+class Sound:
+    def __init__(self):
+        self.file.getparams()
+
+    def write_file(self, new_file_name, values_list):
+        packed_list = []
+        self.file = wave.open(new_file_name, 'w')
+        self.file.setparams((2, 2, 44100, 132300, 'NONE', 'not compressed'))
+
+        for i in xrange(new_file_frames):
+            packed_list.append(struct.pack("<i", int(values_list[i][0])))  # [0])) , unpacked_frame[1]))
+
+        self.file.writeframes(''.join(packed_list))
+        self.file.close()
+
+
+class LoadSound(Sound):
     def __init__(self, name):
+        Sound.__init__(self)
         """loads the file"""
         self.file = wave.open(name, "rb")
-
-    def get_parameters(self):
-        """again definitely not needed, just my train of thought"""
-        self.file.getparams()
+        print self.file.getnchannels()
 
     def read_file(self):
         """returns an unpacked list of values of the sound wave"""
@@ -43,32 +65,37 @@ class LoadSound:
 
         for i in xrange(self.file.getnframes()):
             current_frame = self.file.readframes(1)
-            unpacked_frame = struct.unpack("<hh", current_frame)
+            unpacked_frame = struct.unpack("<i", current_frame)
             unpacked_list.append(unpacked_frame)
+
+        print unpacked_list
 
         return unpacked_list
 
-#            unpacked_frame = step * abs(unpacked_frame[0] / step)
-#            print unpacked_frame
+    def echo(self, echo_length):
+        values_list = self.read_file()
+        new_value_list = []
+        for i in xrange(self.file.getnframes()-1):
+            if i < echo_length:
+                new_value_list.append(values_list[i])
+            else:
+                new_value_list.append(clamp(values_list[i] + values_list[i - echo_length]))
+        return new_value_list
 
-    def write_file(self, new_file_name, values_list):
-        packed_list = []
-        self.file = wave.open(new_file_name, 'w')
-        self.set_parameters(2, 2, 44100, 132300, 'NONE', 'not compressed')
-
-        for i in xrange(new_file_frames):
-            packed_list.append(struct.pack("<h", values_list[i]))  # [0])) , unpacked_frame[1]))
-
-        self.file.writeframes(''.join(packed_list))
-        self.file.close()
-
-        print 'new sound made'
-        """takes the list of newly created values, joins, writes to the file, then closes the wave stream"""
+    def auto_tune(self, step_magnitude):
+        values_list = self.read_file()
+        new_values_list = []
+        for i in xrange(self.file.getnframes()):
+            value = values_list[i]
+            new_value = step_magnitude * abs(value / step_magnitude)
+            new_values_list.append(new_value)
+        return new_values_list
 
 
-class CreateSound:
+class CreateSound(Sound):
     """Creates a file with name 'name' """
     def __init__(self, name):
+        Sound.__init__(self)
         self.file = wave.open(name, 'w')
 
     def set_parameters(self, nchannels, sampwidth, framerate, nframes, comptype, compname):
@@ -78,26 +105,6 @@ class CreateSound:
         self.file.setparams((nchannels, sampwidth, framerate, nframes, comptype, compname))
 
 
-
-
-def echo():
-
-    sound_list_unpacked_to_echo = mmmMMM()
-    new_list_unpacked_with_echo = []
-    echo_length = 1000
-
-    for i in xrange(0, SAMPLE_LENGTH -1):
-        if i < echo_length:
-            new_list_unpacked_with_echo.append(sound_list_unpacked_to_echo[i])
-        else:
-            new_list_unpacked_with_echo.append(sound_list_unpacked_to_echo[i] + sound_list_unpacked_to_echo[i-echo_length] * 0.6)
-        if new_list_unpacked_with_echo[i] > BIT_DEPTH:
-            new_list_unpacked_with_echo[i] = BIT_DEPTH
-        packed_value = struct.pack('<h', new_list_unpacked_with_echo[i])
-        values.append(packed_value)
-    print values
-    noise_out.write_file(values)
-    winsound.PlaySound('noise_with_class.wav', winsound.SND_FILENAME)
 
 
 def mmmMMM():
@@ -151,18 +158,21 @@ def echo_two():
 
 controls = {'m': (mmmMMM, "mmmMMM"),
             'n': (noise, "noise"),
-            'p': (echo, "mmmMMM")}
+            'p': (echo_two, "mmmMMM")}
 for letters in controls:
     print letters + " makes a sound like " + controls[letters][1]
 
 
 'create instance of sound'
-load_noise = LoadSound("gunshot2.wav")
-create_noise = CreateSound('noise_with_class.wav')
+gun = LoadSound("gunshot2.wav")
+gun.write_file('gun3.wav', gun.echo(1000))
+
+winsound.PlaySound('gun3.wav', winsound.SND_FILENAME)
 
 
+#create_noise = CreateSound('noise_with_class.wav')
 
-
+"""
 while True:
 
     for event in pygame.event.get():
@@ -191,3 +201,4 @@ while True:
 #                mmm_sound.play()
                 noise_out = Sound()
                 noise_out.set_parameters(2, 2, 44100, 132300, 'NONE', 'not compressed')
+"""
