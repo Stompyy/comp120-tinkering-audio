@@ -67,7 +67,7 @@ class Sound:
 class LoadSound(Sound):
     def __init__(self, name):
         """loads the file"""
-        self.file = wave.open(name, "r")
+        self.file = wave.open(name, "rb")
         print self.file.getnchannels()
 
     def read_file(self):
@@ -79,8 +79,6 @@ class LoadSound(Sound):
             current_frame = self.file.readframes(1)
             unpacked_frame = struct.unpack("<h", current_frame)
             unpacked_list.append(unpacked_frame[0])
-
-        print unpacked_list
 
         return unpacked_list
 
@@ -210,6 +208,10 @@ scale = CreateSound('scale.wav')
 scale.set_parameters(1, 2, 44100, 132300, 'NONE', 'not compressed')
 scale.wonderwall()
 winsound.PlaySound('scale.wav', winsound.SND_FILENAME)
+
+wonderwall_echo = LoadSound('scale.wav')
+wonderwall_echo.write_file('wonderecho.wav', wonderwall_echo.echo(1000))
+winsound.PlaySound('wonderecho.wav', winsound.SND_FILENAME)
 
 
 
