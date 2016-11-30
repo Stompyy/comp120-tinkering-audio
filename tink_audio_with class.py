@@ -36,16 +36,14 @@ def clamp(value):
 
 
 class Sound:
-    def __init__(self):
-        self.file.getparams()
 
     def write_file(self, new_file_name, values_list):
         packed_list = []
         self.file = wave.open(new_file_name, 'w')
-        self.file.setparams((2, 2, 44100, 132300, 'NONE', 'not compressed'))
+        self.file.setparams((1, 1, 44100, 132300, 'NONE', 'not compressed'))
 
-        for i in xrange(new_file_frames):
-            packed_list.append(struct.pack("<i", int(values_list[i][0])))  # [0])) , unpacked_frame[1]))
+        for i in xrange(self.file.getnframes()-1):
+            packed_list.append(struct.pack("<h", int(values_list[i])))  # [0])) , unpacked_frame[1]))
 
         self.file.writeframes(''.join(packed_list))
         self.file.close()
@@ -53,7 +51,6 @@ class Sound:
 
 class LoadSound(Sound):
     def __init__(self, name):
-        Sound.__init__(self)
         """loads the file"""
         self.file = wave.open(name, "rb")
         print self.file.getnchannels()
@@ -66,7 +63,7 @@ class LoadSound(Sound):
         for i in xrange(self.file.getnframes()):
             current_frame = self.file.readframes(1)
             unpacked_frame = struct.unpack("<i", current_frame)
-            unpacked_list.append(unpacked_frame)
+            unpacked_list.append(unpacked_frame[0])
 
         print unpacked_list
 
@@ -95,7 +92,6 @@ class LoadSound(Sound):
 class CreateSound(Sound):
     """Creates a file with name 'name' """
     def __init__(self, name):
-        Sound.__init__(self)
         self.file = wave.open(name, 'w')
 
     def set_parameters(self, nchannels, sampwidth, framerate, nframes, comptype, compname):
@@ -165,7 +161,12 @@ for letters in controls:
 
 'create instance of sound'
 gun = LoadSound("gunshot2.wav")
-gun.write_file('gun3.wav', gun.echo(1000))
+gun.write_file("gun3.wav", gun.read_file())
+
+
+
+#gun = LoadSound("gunshot2.wav")
+#gun.write_file('gun3.wav', gun.echo(1000))
 
 winsound.PlaySound('gun3.wav', winsound.SND_FILENAME)
 
