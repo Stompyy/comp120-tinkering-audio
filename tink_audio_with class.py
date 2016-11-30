@@ -115,9 +115,9 @@ class CreateSound(Sound):
 
     def sound_envelope(self, max_volume, frequency):
         new_values_list = []
-        attack_time = 0.1 * SAMPLE_RATE
-        sustain_time = 0.3 * SAMPLE_RATE
-        release_time = 0.4 * SAMPLE_RATE
+        attack_time = 0.05 * SAMPLE_RATE
+        sustain_time = 0.1 * SAMPLE_RATE
+        release_time = 0.2 * SAMPLE_RATE
         total_time = attack_time + sustain_time + release_time
         current_volume = 0.0
 
@@ -142,6 +142,11 @@ class CreateSound(Sound):
     def wonderwall(self):
         wonderwall = ['E', 'E', 'G', 'G', 'D', 'D', 'A', 'A']
         for note in wonderwall:
+            self.sound_envelope(BIT_DEPTH, notes[note])
+
+    def come_as_you_are(self):
+        come_as_you_are = ['E', 'E', 'F', 'F#', 'F#', 'A', 'F#', 'A', 'F#', 'F#', 'F', 'E', 'E', 'B', 'E', 'B']
+        for note in come_as_you_are:
             self.sound_envelope(BIT_DEPTH, notes[note])
 
 
@@ -192,6 +197,33 @@ def echo_two():
         values.append(packed_value)
 
 
+
+
+
+scale = CreateSound('scale.wav')
+scale.set_parameters(1, 2, 44100, 132300, 'NONE', 'not compressed')
+scale.wonderwall()
+# winsound.PlaySound('scale.wav', winsound.SND_FILENAME)
+
+wonderwall_echo = LoadSound('scale.wav')
+wonderwall_echo.write_file('wonderecho.wav', wonderwall_echo.echo(1000))
+winsound.PlaySound('wonderecho.wav', winsound.SND_FILENAME)
+
+nirvana = CreateSound('comeasyouare.wav')
+nirvana.set_parameters(1, 2, 44100, 132300, 'NONE', 'not compressed')
+nirvana.come_as_you_are()
+winsound.PlaySound('comeasyouare.wav', winsound.SND_FILENAME)
+
+
+
+#gun = LoadSound("gunshot2.wav")
+#gun.write_file('gun3.wav', gun.echo(1000))
+
+winsound.PlaySound('gun3.wav', winsound.SND_FILENAME)
+
+
+
+"""
 controls = {'m': (mmmMMM, "mmmMMM"),
             'n': (noise, "noise"),
             'p': (echo_two, "mmmMMM")}
@@ -203,27 +235,6 @@ for letters in controls:
 # gun = LoadSound("gunshot2.wav")
 # gun.write_file("gun3.wav", gun.read_file())
 
-
-scale = CreateSound('scale.wav')
-scale.set_parameters(1, 2, 44100, 132300, 'NONE', 'not compressed')
-scale.wonderwall()
-winsound.PlaySound('scale.wav', winsound.SND_FILENAME)
-
-wonderwall_echo = LoadSound('scale.wav')
-wonderwall_echo.write_file('wonderecho.wav', wonderwall_echo.echo(1000))
-winsound.PlaySound('wonderecho.wav', winsound.SND_FILENAME)
-
-
-
-#gun = LoadSound("gunshot2.wav")
-#gun.write_file('gun3.wav', gun.echo(1000))
-
-winsound.PlaySound('gun3.wav', winsound.SND_FILENAME)
-
-
-#create_noise = CreateSound('noise_with_class.wav')
-
-"""
 while True:
 
     for event in pygame.event.get():
