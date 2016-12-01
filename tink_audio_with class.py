@@ -1,11 +1,41 @@
 import wave, struct, sys, math, winsound, pygame
 from pygame.locals import *
 
+"""write a list of notes to play, and a tuple of the three time periods:
+    ________
+  /         \
+ /           \
+/             \
+attack
+    sustain
+        release
+e.g. (0.2, 0.5, 0.4)
+
+Declare an instance of CreateSound('filename.wav')
+then:
+instance.play_sound(notes_list, tuple)
+You'll see at the end
+Can't get anything to sound decent though
+probably not imaginative enough
+
+Alternatively can create a custom note with def custom_note(n)
+where if n > 12 gets very high pitched or n < 0 very low
+
+instance.sound_envelope(frequency, tuple) creates the sine wave so maybe
+directly messing with the frequency argument will be best for gunshots etc.
+Need to tell it to play like with new_gun instance below at the bottom.
+
+easy enough but annoyingly difficult to get anything to sound decent
+
+volume is an outside variable: volume
+Didn't see any need to pass it into sound_envelope function as an argument
+but it's easily enough done. Volume is multiplied in the pure_tone_frame = ... line
+just careful not to mix it up with the current_volume variable. That's the
+envelope bit.
+"""
+
 pygame.init()
 pygame.mixer.init()
-
-WINDOW_WIDTH = 300
-WINDOW_HEIGHT = 100
 
 LENGTH_OF_TRACK = 1
 SAMPLE_LENGTH = 44100 * LENGTH_OF_TRACK
@@ -13,18 +43,13 @@ FREQUENCY = float(1000)
 SAMPLE_RATE = float(44100)
 BIT_DEPTH = 32767           # 2 to the power (16 - 1 for sign) -1 for zero
 load_file = True
+# standard_parameters = 1, 2, 44100, 132300, 'NONE', 'not compressed'
 
 volume = 0.5
 
 values = []
 new_file_frames = 132300
 
-window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-window.fill((255, 255, 255))
-font = pygame.font.SysFont(None, 48)
-levelText = font.render('m = mmmMMM', True, (0, 0, 0))
-window.blit(levelText, (0, 0))
-pygame.display.update()
 
 notes = {'A' : 440 * math.pow(2, 0.0/12.0),
          'Bb': 440 * math.pow(2, 1.0/12.0),
@@ -43,21 +68,33 @@ notes = {'A' : 440 * math.pow(2, 0.0/12.0),
 scale = ['A', 'Bb', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
 wonderwall = ['E', 'E', 'G', 'G', 'D', 'D', 'A', 'A']
 come_as_you_are = ['E', 'E', 'F', 'F#', 'F#', 'A', 'F#', 'A', 'F#', 'F#', 'F', 'E', 'E', 'B', 'E', 'B']
-new_song_list = ['G', 'F#', 'F', 'E',
+tense_list = ['G', 'F#', 'F', 'E',
                  'G', 'F#', 'F', 'E',
                  'G', 'F#', 'F', 'E',
                  'G', 'F#', 'F', 'E',]
-walking = ['F', 'E',
-           'F', 'E',
-           'F', 'E',
-           'F', 'E']
-gunshot = ['G#']
+walking_list = ['F', 'E',
+                'F', 'E',
+                'F', 'E',
+                'F', 'E']
+gunshot_list = ['G#']
+growl_list = ['A', 'A', 'Bb', 'Bb',
+              'B', 'B', 'C', 'C',
+              'C', 'C', 'Bb', 'Bb',
+              'B', 'B', 'A', 'A', ]
+equip_list = ['B', 'E']
+
 
 # Attack, sustain, release values
+quickest = (0.02, 0.0, 0.02)
 quick = (0.02, 0.03, 0.08)
 medium = (0.05, 0.1, 0.2)
 slow = (0.1, 0.2, 0.3)
-gunshot_speed = (0.05, 0.1, 0.8)
+gunshot_speed = (0.02, 0.02, 0.2)
+equip_speed = (0.0, 0.1, 0.2)
+
+
+def custom_note(n):
+    return 440 * math.pow(2, n/12.0)
 
 
 def clamp(value):
@@ -73,8 +110,8 @@ def clamp(value):
 class Sound:
     def write_file(self, new_file_name, values_list):
         packed_list = []
-        self.file = wave.open(new_file_name, 'w')
-        self.file.setparams((1, 2, 44100, 132300, 'NONE', 'not compressed'))
+        #self.file = wave.open(new_file_name, 'w')
+        #self.file.setparams((1, 2, 44100, 132300, 'NONE', 'not compressed'))
 
         for i in xrange(self.file.getnframes()-1):
             packed_list.append(struct.pack("<h", int(values_list[i])))  # [0])) , unpacked_frame[1]))
@@ -126,6 +163,7 @@ class CreateSound(Sound):
         self.file = wave.open(name, 'w')
         self.new_values_list = []
         self.name = name
+        self.file.setparams((1, 2, 44100, 132300, 'NONE', 'not compressed'))
 
     def set_parameters(self, nchannels, sampwidth, framerate, nframes, comptype, compname):
         """sets the parameters of the .wav file"""
@@ -160,24 +198,6 @@ class CreateSound(Sound):
         winsound.PlaySound(self.name, winsound.SND_FILENAME)
 
 
-def mmmMMM():
-    """doc string"""
-    list1 = []
-    for i in xrange(0, SAMPLE_LENGTH):
-        base_sound_wave_value = math.sin(2.0 * math.pi * FREQUENCY * (i / SAMPLE_RATE))
-
-        # takes base value and brings up to correct BIT_DEPTH * volume
-        # volume = i / SAMPLE_LENGTH increases volume over time. #leetfx
-        value = base_sound_wave_value * BIT_DEPTH * i / SAMPLE_LENGTH
-        list1.append(value)
-        unpacked_values_list_for_echo.append(value)
-
-        packed_value = struct.pack('<h', value)
-        values.append(packed_value)
-        print packed_value
-    return list1
-
-
 def noise():
     """doc string"""
     list1 = []
@@ -206,15 +226,27 @@ def echo_two():
         packed_value = struct.pack('<h', value)
         values.append(packed_value)
 
+new_gun = CreateSound('newgun.wav')
+new_gun.sound_envelope(custom_note(-9), gunshot_speed)
+#winsound.PlaySound(new_gun.name, winsound.SND_FILENAME)
+
 new_song = CreateSound('newsong.wav')
-new_song.set_parameters(1, 2, 44100, 132300, 'NONE', 'not compressed')
-new_song.play_song(new_song_list, quick)
-# new_song.play_song(new_song_list, medium)
+new_song.play_song(tense_list, quick)
+#new_song.play_song(tense_list, medium)
 
 gunshot_instance = CreateSound('gunsh.wav')
-gunshot_instance.set_parameters(1, 2, 44100, 132300, 'NONE', 'not compressed')
-gunshot_instance.play_song(gunshot, gunshot_speed)
+#gunshot_instance.play_song(gunshot_list, gunshot_speed)
 
 walking_instance = CreateSound('walking.wav')
-walking_instance.set_parameters(1, 2, 44100, 132300, 'NONE', 'not compressed')
-walking_instance.play_song(walking, slow)
+#walking_instance.play_song(walking_list, slow)
+
+raptor_growl = CreateSound('rapgrowl.wav')
+raptor_growl.play_song(growl_list, quickest)
+
+equip = CreateSound('equip.wav')
+equip.play_song(equip_list, equip_speed)
+
+headphone_killer = CreateSound('fubar.wav')
+headphone_killer.sound_envelope(custom_note(80), slow)
+#winsound.PlaySound(headphone_killer.name, winsound.SND_FILENAME)
+
