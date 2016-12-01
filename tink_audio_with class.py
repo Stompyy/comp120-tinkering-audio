@@ -39,6 +39,26 @@ notes = {'A' : 440 * math.pow(2, 0.0/12.0),
          'G' : 440 * math.pow(2, 10.0/12.0),
          'G#': 440 * math.pow(2, 11.0/12.0)}
 
+# notes lists
+scale = ['A', 'Bb', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
+wonderwall = ['E', 'E', 'G', 'G', 'D', 'D', 'A', 'A']
+come_as_you_are = ['E', 'E', 'F', 'F#', 'F#', 'A', 'F#', 'A', 'F#', 'F#', 'F', 'E', 'E', 'B', 'E', 'B']
+new_song_list = ['G', 'F#', 'F', 'E',
+                 'G', 'F#', 'F', 'E',
+                 'G', 'F#', 'F', 'E',
+                 'G', 'F#', 'F', 'E',]
+walking = ['F', 'E',
+           'F', 'E',
+           'F', 'E',
+           'F', 'E']
+gunshot = ['G#']
+
+# Attack, sustain, release values
+quick = (0.02, 0.03, 0.08)
+medium = (0.05, 0.1, 0.2)
+slow = (0.1, 0.2, 0.3)
+gunshot_speed = (0.05, 0.1, 0.8)
+
 
 def clamp(value):
     if value > BIT_DEPTH:
@@ -51,7 +71,6 @@ def clamp(value):
 
 
 class Sound:
-
     def write_file(self, new_file_name, values_list):
         packed_list = []
         self.file = wave.open(new_file_name, 'w')
@@ -68,7 +87,6 @@ class LoadSound(Sound):
     def __init__(self, name):
         """loads the file"""
         self.file = wave.open(name, "rb")
-        print self.file.getnchannels()
 
     def read_file(self):
         """returns an unpacked list of values of the sound wave"""
@@ -106,6 +124,8 @@ class CreateSound(Sound):
     """Creates a file with name 'name' """
     def __init__(self, name):
         self.file = wave.open(name, 'w')
+        self.new_values_list = []
+        self.name = name
 
     def set_parameters(self, nchannels, sampwidth, framerate, nframes, comptype, compname):
         """sets the parameters of the .wav file"""
@@ -113,11 +133,11 @@ class CreateSound(Sound):
         # probably unnecessary to have in a function. Just do after creating an instance
         self.file.setparams((nchannels, sampwidth, framerate, nframes, comptype, compname))
 
-    def sound_envelope(self, frequency, attack_time, sustain_time, release_time ):
-        new_values_list = []
-        attack_frames = attack_time * SAMPLE_RATE
-        sustain_frames = sustain_time * SAMPLE_RATE
-        release_frames = release_time * SAMPLE_RATE
+    def sound_envelope(self, frequency, attack_sustain_release):
+        self.new_values_list = []
+        attack_frames = attack_sustain_release[0] * SAMPLE_RATE
+        sustain_frames = attack_sustain_release[1] * SAMPLE_RATE
+        release_frames = attack_sustain_release[2] * SAMPLE_RATE
         total_frames = attack_frames + sustain_frames + release_frames
         current_volume = 0.0
 
@@ -130,29 +150,15 @@ class CreateSound(Sound):
                 current_volume = BIT_DEPTH
 
             pure_tone_frame = math.sin(frame * frequency / SAMPLE_RATE) * current_volume * 2.0 * math.pi
-            new_values_list.append(struct.pack("<h", clamp(pure_tone_frame)))
+            self.new_values_list.append(struct.pack("<h", clamp(pure_tone_frame)))
 
-        self.file.writeframes(''.join(new_values_list))
+        self.file.writeframes(''.join(self.new_values_list))
 
-    def play_scale(self):
-        scale = ['A', 'Bb', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
-        for note in scale:
-            self.sound_envelope(notes[note], 0.1, 0.1, 0.1)
+    def play_song(self, notes_list, attack_sustain_release):
+        for note in notes_list:
+            self.sound_envelope(notes[note], attack_sustain_release)
+        winsound.PlaySound(self.name, winsound.SND_FILENAME)
 
-    def wonderwall(self):
-        wonderwall = ['E', 'E', 'G', 'G', 'D', 'D', 'A', 'A']
-        for note in wonderwall:
-            self.sound_envelope(notes[note], 0.1, 0.2, 0.3)
-
-    def come_as_you_are(self):
-        come_as_you_are = ['E', 'E', 'F', 'F#', 'F#', 'A', 'F#', 'A', 'F#', 'F#', 'F', 'E', 'E', 'B', 'E', 'B']
-        for note in come_as_you_are:
-            self.sound_envelope(notes[note], 0.05, 0.1, 0.2)
-
-    def new_song(self):
-        new_song = ['G', 'F#', 'F', 'E', 'G', 'F#', 'F', 'E', 'G', 'F#', 'F', 'E', 'G', 'F#', 'F', 'E',]
-        for note in new_song:
-            self.sound_envelope(notes[note], 0.02, 0.03, 0.08)
 
 def mmmMMM():
     """doc string"""
@@ -200,75 +206,15 @@ def echo_two():
         packed_value = struct.pack('<h', value)
         values.append(packed_value)
 
-
-
-
-
-scale = CreateSound('scale.wav')
-scale.set_parameters(1, 2, 44100, 132300, 'NONE', 'not compressed')
-scale.wonderwall()
-# winsound.PlaySound('scale.wav', winsound.SND_FILENAME)
-
-wonderwall_echo = LoadSound('scale.wav')
-wonderwall_echo.write_file('wonderecho.wav', wonderwall_echo.echo(1000))
-winsound.PlaySound('wonderecho.wav', winsound.SND_FILENAME)
-
-nirvana = CreateSound('comeasyouare.wav')
-nirvana.set_parameters(1, 2, 44100, 132300, 'NONE', 'not compressed')
-nirvana.come_as_you_are()
-#winsound.PlaySound('comeasyouare.wav', winsound.SND_FILENAME)
-
-new_song = CreateSound('new_song.wav')
+new_song = CreateSound('newsong.wav')
 new_song.set_parameters(1, 2, 44100, 132300, 'NONE', 'not compressed')
-new_song.new_song()
-winsound.PlaySound('new_song.wav', winsound.SND_FILENAME)
+new_song.play_song(new_song_list, quick)
+# new_song.play_song(new_song_list, medium)
 
+gunshot_instance = CreateSound('gunsh.wav')
+gunshot_instance.set_parameters(1, 2, 44100, 132300, 'NONE', 'not compressed')
+gunshot_instance.play_song(gunshot, gunshot_speed)
 
-#gun = LoadSound("gunshot2.wav")
-#gun.write_file('gun3.wav', gun.echo(1000))
-
-winsound.PlaySound('gun3.wav', winsound.SND_FILENAME)
-
-
-
-"""
-controls = {'m': (mmmMMM, "mmmMMM"),
-            'n': (noise, "noise"),
-            'p': (echo_two, "mmmMMM")}
-for letters in controls:
-    print letters + " makes a sound like " + controls[letters][1]
-
-
-'create instance of sound'
-# gun = LoadSound("gunshot2.wav")
-# gun.write_file("gun3.wav", gun.read_file())
-
-while True:
-
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
-
-        keys = pygame.key.get_pressed()
-
-        if event.type == pygame.KEYDOWN:
-            key_pressed = pygame.key.name(event.key)
-            if key_pressed in controls:
-                command = controls[key_pressed][0]
-                command()
-
-                # sets parameters and writes newly made value_string as sound wave
-                noise_out.set_parameters(2, 2, 44100, 132300, 'NONE', 'not compressed')
-                noise_out.write_file(values)
-
-                print 'now play'
-                del noise_out
-                winsound.PlaySound('noise_with_class.wav', winsound.SND_FILENAME)
-                # or with pygame
-                # can't get this to work?
-#                mmm_sound = pygame.mixer.Sound('noise_with_class.wav')
-#                mmm_sound.play()
-                noise_out = Sound()
-                noise_out.set_parameters(2, 2, 44100, 132300, 'NONE', 'not compressed')
-"""
+walking_instance = CreateSound('walking.wav')
+walking_instance.set_parameters(1, 2, 44100, 132300, 'NONE', 'not compressed')
+walking_instance.play_song(walking, medium)
