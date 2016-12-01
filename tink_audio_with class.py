@@ -149,7 +149,7 @@ class CreateSound(Sound):
             else:
                 current_volume = BIT_DEPTH
 
-            pure_tone_frame = math.sin(frame * frequency / SAMPLE_RATE) * current_volume * 2.0 * math.pi
+            pure_tone_frame = math.sin(frame * frequency / SAMPLE_RATE) * current_volume * 2.0 * math.pi * volume
             self.new_values_list.append(struct.pack("<h", clamp(pure_tone_frame)))
 
         self.file.writeframes(''.join(self.new_values_list))
@@ -217,4 +217,4 @@ gunshot_instance.play_song(gunshot, gunshot_speed)
 
 walking_instance = CreateSound('walking.wav')
 walking_instance.set_parameters(1, 2, 44100, 132300, 'NONE', 'not compressed')
-walking_instance.play_song(walking, medium)
+walking_instance.play_song(walking, slow)
