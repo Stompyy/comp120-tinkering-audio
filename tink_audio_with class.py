@@ -90,7 +90,7 @@ quick = (0.02, 0.03, 0.08)
 medium = (0.05, 0.1, 0.2)
 slow = (0.1, 0.2, 0.3)
 gunshot_speed = (0.02, 0.02, 0.2)
-equip_speed = (0.0, 0.1, 0.2)
+equip_speed = (0.0, 0.1, 0.0)
 
 
 def custom_note(n):
@@ -231,17 +231,17 @@ new_gun.sound_envelope(custom_note(-9), gunshot_speed)
 #winsound.PlaySound(new_gun.name, winsound.SND_FILENAME)
 
 new_song = CreateSound('newsong.wav')
-new_song.play_song(tense_list, quick)
+#new_song.play_song(tense_list, quick)
 #new_song.play_song(tense_list, medium)
 
 gunshot_instance = CreateSound('gunsh.wav')
 #gunshot_instance.play_song(gunshot_list, gunshot_speed)
 
 walking_instance = CreateSound('walking.wav')
-#walking_instance.play_song(walking_list, slow)
+#walking_instance.play_song(walking_list, medium)
 
 raptor_growl = CreateSound('rapgrowl.wav')
-raptor_growl.play_song(growl_list, quickest)
+#raptor_growl.play_song(growl_list, quickest)
 
 equip = CreateSound('equip.wav')
 equip.play_song(equip_list, equip_speed)
