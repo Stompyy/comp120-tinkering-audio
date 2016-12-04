@@ -108,8 +108,9 @@ def clamp(value):
 
 
 class Sound:
-    def write_file(self, values_list):
-        self.file = wave.open("teleport.wav", 'w')
+
+    def write_file(self, values_list, file_name):
+        self.file = wave.open(file_name, 'w')
         self.file.setparams((1, 2, 44100, 132300, 'NONE', 'not compressed'))
 
         for value in values_list:
@@ -206,6 +207,17 @@ def Teleport():
         value_list.append(value)
     return value_list
 
+def echo(list):
+    counter = 0
+    new_list = []
+    for i in list:
+        if counter < 6000:
+            new_list.append(i)
+        else:
+            new_list.append(((list[counter-1000])+ i))
+        counter += 1
+    return new_list
+
 Make_Sound = Sound()
 
 new_gun = CreateSound('newgun.wav')
@@ -233,6 +245,7 @@ headphone_killer.sound_envelope(custom_note(80), slow)
 #winsound.PlaySound(headphone_killer.name, winsound.SND_FILENAME)
 
 
-Make_Sound.write_file(Teleport())
+Make_Sound.write_file(Teleport(),"file_name")
+Make_Sound.write_file(echo(Teleport()),"echo.wav")
 
 
