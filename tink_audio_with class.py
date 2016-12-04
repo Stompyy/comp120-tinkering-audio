@@ -223,6 +223,7 @@ def echo(list):
     for i in list:
         if counter < 6000:
             new_list.append(i)
+
         else:
             new_list.append(((list[counter-1000])+ i))
         counter += 1
