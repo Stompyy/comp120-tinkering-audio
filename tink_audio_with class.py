@@ -108,15 +108,13 @@ def clamp(value):
 
 
 class Sound:
-    def write_file(self, new_file_name, values_list):
-        packed_list = []
-        #self.file = wave.open(new_file_name, 'w')
-        #self.file.setparams((1, 2, 44100, 132300, 'NONE', 'not compressed'))
+    def write_file(self, values_list):
+        self.file = wave.open("teleport.wav", 'w')
+        self.file.setparams((1, 2, 44100, 132300, 'NONE', 'not compressed'))
 
-        for i in xrange(self.file.getnframes()-1):
-            packed_list.append(struct.pack("<h", int(values_list[i])))  # [0])) , unpacked_frame[1]))
-
-        self.file.writeframes(''.join(packed_list))
+        for value in values_list:
+            packed_value = (struct.pack("<h", value))
+            self.file.writeframes(packed_value)
         self.file.close()
 
 
@@ -198,33 +196,17 @@ class CreateSound(Sound):
         winsound.PlaySound(self.name, winsound.SND_FILENAME)
 
 
-def noise():
+def Teleport():
     """doc string"""
-    list1 = []
+    value_list = []
     for i in xrange(0,SAMPLE_LENGTH):
-        value_1 = math.sin(math.pi * FREQUENCY * (i / float(44100))) + math.sin(
-            math.pi / float(1.01) * FREQUENCY * (i / float(44100)))
+        value_1 = math.sin(math.pi * FREQUENCY*0.75 * (i / float(44100))) + math.sin(
+            math.pi / float(1.01) * FREQUENCY*0.75 * (i / float(44100)))
         value = (value_1 * (volume * BIT_DEPTH))
-        list1.append(value)
-        value = (value_1 * (volume * 32000))
-        packed_value = struct.pack('<h', value)
-        values.append(packed_value)
-    return list1
+        value_list.append(value)
+    return value_list
 
-
-def echo_two():
-    echolist = noise()
-    counter = 0
-    for i in echolist:
-        counter +=1
-        if i <1000:
-            value = i
-        else:
-            value = i + (echolist[counter-1000]*0.8)
-        if value > 32000:
-            value = 32000
-        packed_value = struct.pack('<h', value)
-        values.append(packed_value)
+Make_Sound = Sound()
 
 new_gun = CreateSound('newgun.wav')
 new_gun.sound_envelope(custom_note(-9), gunshot_speed)
@@ -244,9 +226,13 @@ raptor_growl = CreateSound('rapgrowl.wav')
 #raptor_growl.play_song(growl_list, quickest)
 
 equip = CreateSound('equip.wav')
-equip.play_song(equip_list, equip_speed)
+#equip.play_song(equip_list, equip_speed)
 
 headphone_killer = CreateSound('fubar.wav')
 headphone_killer.sound_envelope(custom_note(80), slow)
 #winsound.PlaySound(headphone_killer.name, winsound.SND_FILENAME)
+
+
+Make_Sound.write_file(Teleport())
+
 
