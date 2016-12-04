@@ -63,10 +63,17 @@ notes = {'A' : 440 * math.pow(2, 0.0/12.0),
          'F#': 440 * math.pow(2, 9.0/12.0),
          'G' : 440 * math.pow(2, 10.0/12.0),
          'G#': 440 * math.pow(2, 11.0/12.0),
-         'hi': 440 * math.pow(2, 15.0/12.0)}
+         'gunshot': 440 * math.pow(2, 5),
+         'growl_1': 440 * math.pow(2, 3),
+         'growl_2': 440 * math.pow(2, 1.5),
+         'growl_3': 440 * math.pow(2, 0.5),
+         'roar_1': 440 * math.pow(2, 11.0/12.0),
+         'roar_2': 440 * math.pow(2, 10.0/12.0),
+         'roar_3': 440 * math.pow(2, 19.0/20.0)}
 
 # notes lists
-scale = ['A', 'Bb', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
+custom = ['gunshot']
+scale = ['A','Bb', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
 wonderwall = ['E', 'E', 'G', 'G', 'D', 'D', 'A', 'A']
 come_as_you_are = ['E', 'E', 'F', 'F#', 'F#', 'A', 'F#', 'A', 'F#', 'F#', 'F', 'E', 'E', 'B', 'E', 'B']
 tense_list = ['G', 'F#', 'F', 'E',
@@ -78,10 +85,12 @@ walking_list = ['F', 'E',
                 'F', 'E',
                 'F', 'E']
 gunshot_list = ['G#']
-growl_list = ['A', 'A', 'Bb', 'Bb',
-              'B', 'B', 'C', 'C',
-              'C', 'C', 'Bb', 'Bb',
-              'B', 'B', 'A', 'A', ]
+growl_dead = ['growl_1', 'growl_1','growl_2', 'growl_2',
+              'growl_2', 'growl_2', 'growl_3', 'growl_3', ]
+growl_alive = ['growl_3', 'growl_3','growl_2', 'growl_2',
+              'growl_2', 'growl_2', 'growl_1', 'growl_1', ]
+roar = ['roar_1', 'roar_1','roar_2', 'roar_2',
+              'roar_2', 'roar_2', 'growl_3', 'roar_3', ]
 equip_list = ['B', 'E']
 
 
@@ -90,8 +99,10 @@ quickest = (0.02, 0.0, 0.02)
 quick = (0.02, 0.03, 0.08)
 medium = (0.05, 0.1, 0.2)
 slow = (0.1, 0.2, 0.3)
-gunshot_speed = (0.6, 0.6, 0.6)
+gunshot_speed = (0.,0.01,0.01)
 equip_speed = (0.0, 0.1, 0.0)
+growl = (0.01,0.0,0.01)
+new_test = (0.0,0.,0.01)
 
 
 def custom_note(n):
@@ -234,32 +245,38 @@ def echo(list):
 
 Make_Sound = Sound()
 
-new_gun = CreateSound('newgun.wav')
-new_gun.sound_envelope(custom_note(-9), gunshot_speed)
+# gunshot = CreateSound('gunshot.wav')
+# gunshot.sound_envelope(custom_note(-9), gunshot_speed)
 #winsound.PlaySound(new_gun.name, winsound.SND_FILENAME)
 
 new_song = CreateSound('newsong.wav')
 #new_song.play_song(tense_list, quick)
 #new_song.play_song(tense_list, medium)
 
-gunshot_instance = CreateSound('gunsh.wav')
-gunshot_instance.play_song(gunshot_list, gunshot_speed)
+gunshot = CreateSound('gunshot.wav')
+#gunshot.play_song(custom, gunshot_speed)
 
 walking_instance = CreateSound('walking.wav')
 #walking_instance.play_song(walking_list, medium)
 
-raptor_growl = CreateSound('rapgrowl.wav')
-raptor_growl.play_song(growl_list, quickest)
+raptor_dead = CreateSound('rapgrowldead.wav')
+#raptor_dead.play_song(growl_dead, growl)
+
+raptor_alive = CreateSound('rapalive.wav')
+#raptor_alive.play_song(growl_alive, growl)
 
 equip = CreateSound('equip.wav')
 #equip.play_song(equip_list, equip_speed)
+
+overloard_roar = CreateSound('overlordroar.wav')
+overloard_roar.play_song(roar, growl)
 
 headphone_killer = CreateSound('fubar.wav')
 headphone_killer.sound_envelope(custom_note(80), slow)
 #winsound.PlaySound(headphone_killer.name, winsound.SND_FILENAME)
 
 
-Make_Sound.write_file(Teleport(),"file_name")
+Make_Sound.write_file(Teleport(),"teleport.wav")
 Make_Sound.write_file(echo(Teleport()),"echo.wav")
 
 
