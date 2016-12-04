@@ -114,6 +114,17 @@ def clamp(value_list):
         clamped_list.append(i*multiplier)
     return clamped_list
 
+def clamp_1(list):
+    clamped_list = []
+    for value in list:
+        if value > BIT_DEPTH:
+            clamped_list.append(BIT_DEPTH)
+        elif value < - BIT_DEPTH:
+            clamped_list.append(-BIT_DEPTH)
+        else:
+            clamped_list.append(value)
+        return clamped_list
+
 
 
 class Sound:
@@ -197,7 +208,7 @@ class CreateSound(Sound):
 
             pure_tone_frame = math.sin(frame * frequency / SAMPLE_RATE) * current_volume * 2.0 * math.pi * volume
             self.new_values_list.append(pure_tone_frame)
-        return (self.new_values_list)
+        return clamp_1(self.new_values_list)
 
 
     def play_song(self, notes_list, attack_sustain_release):
