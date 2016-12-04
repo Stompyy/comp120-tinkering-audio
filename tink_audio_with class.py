@@ -62,7 +62,8 @@ notes = {'A' : 440 * math.pow(2, 0.0/12.0),
          'F' : 440 * math.pow(2, 8.0/12.0),
          'F#': 440 * math.pow(2, 9.0/12.0),
          'G' : 440 * math.pow(2, 10.0/12.0),
-         'G#': 440 * math.pow(2, 11.0/12.0)}
+         'G#': 440 * math.pow(2, 11.0/12.0),
+         'hi': 440 * math.pow(2, 15.0/12.0)}
 
 # notes lists
 scale = ['A', 'Bb', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
@@ -89,22 +90,29 @@ quickest = (0.02, 0.0, 0.02)
 quick = (0.02, 0.03, 0.08)
 medium = (0.05, 0.1, 0.2)
 slow = (0.1, 0.2, 0.3)
-gunshot_speed = (0.02, 0.02, 0.2)
+gunshot_speed = (0.6, 0.6, 0.6)
 equip_speed = (0.0, 0.1, 0.0)
 
 
 def custom_note(n):
     return 440 * math.pow(2, n/12.0)
 
-
-def clamp(value):
-    if value > BIT_DEPTH:
-        clamped_value = BIT_DEPTH
-    elif value < - BIT_DEPTH:
-        clamped_value = -BIT_DEPTH
-    else:
-        clamped_value = value
-    return clamped_value
+def clamp(value_list):
+    biggest_value = 0
+    lowest_value = 0
+    clamped_list = []
+    for i in value_list:
+        if i > biggest_value:
+            biggest_value = i
+        if i < lowest_value:
+            lowest_value = i
+    if biggest_value > -lowest_value:
+        multiplier = BIT_DEPTH / biggest_value
+    if -lowest_value > biggest_value:
+        multiplier = BIT_DEPTH / -lowest_value
+    for i in value_list:
+        clamped_list.append(i * multiplier)
+    return clamped_list
 
 
 class Sound:
@@ -163,7 +171,7 @@ class CreateSound(Sound):
         self.new_values_list = []
         self.name = name
         self.file.setparams((1, 2, 44100, 132300, 'NONE', 'not compressed'))
-
+        self.temp_values_list = []
     def set_parameters(self, nchannels, sampwidth, framerate, nframes, comptype, compname):
         """sets the parameters of the .wav file"""
 
@@ -176,7 +184,7 @@ class CreateSound(Sound):
         sustain_frames = attack_sustain_release[1] * SAMPLE_RATE
         release_frames = attack_sustain_release[2] * SAMPLE_RATE
         total_frames = attack_frames + sustain_frames + release_frames
-        current_volume = 0.0
+        current_volume = 1
 
         for frame in xrange(int(total_frames)):
             if frame < attack_frames:
@@ -187,7 +195,13 @@ class CreateSound(Sound):
                 current_volume = BIT_DEPTH
 
             pure_tone_frame = math.sin(frame * frequency / SAMPLE_RATE) * current_volume * 2.0 * math.pi * volume
-            self.new_values_list.append(struct.pack("<h", clamp(pure_tone_frame)))
+            self.temp_values_list.append(pure_tone_frame)
+
+        self.temp_values_list = clamp(self.temp_values_list)
+        for i in self.temp_values_list:
+            packed_value = (struct.pack("<h", i))
+            self.new_values_list.append(packed_value)
+
 
         self.file.writeframes(''.join(self.new_values_list))
 
@@ -229,13 +243,13 @@ new_song = CreateSound('newsong.wav')
 #new_song.play_song(tense_list, medium)
 
 gunshot_instance = CreateSound('gunsh.wav')
-#gunshot_instance.play_song(gunshot_list, gunshot_speed)
+gunshot_instance.play_song(gunshot_list, gunshot_speed)
 
 walking_instance = CreateSound('walking.wav')
 #walking_instance.play_song(walking_list, medium)
 
 raptor_growl = CreateSound('rapgrowl.wav')
-#raptor_growl.play_song(growl_list, quickest)
+raptor_growl.play_song(growl_list, quickest)
 
 equip = CreateSound('equip.wav')
 #equip.play_song(equip_list, equip_speed)
