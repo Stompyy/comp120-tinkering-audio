@@ -97,14 +97,23 @@ def custom_note(n):
     return 440 * math.pow(2, n/12.0)
 
 
-def clamp(value):
-    if value > BIT_DEPTH:
-        clamped_value = BIT_DEPTH
-    elif value < - BIT_DEPTH:
-        clamped_value = -BIT_DEPTH
-    else:
-        clamped_value = value
-    return clamped_value
+def clamp(value_list):
+    biggest_value = 0
+    lowest_value = 0
+    clamped_list = []
+    for i in value_list:
+        if i > biggest_value:
+            biggest_value = i
+        if i < lowest_value:
+            lowest_value = i
+    if biggest_value > -lowest_value:
+        multiplier = BIT_DEPTH/biggest_value
+    if -lowest_value > biggest_value:
+        multiplier = BIT_DEPTH/-lowest_value
+    for i in value_list:
+        clamped_list.append(i*multiplier)
+    return clamped_list
+
 
 
 class Sound:
@@ -176,7 +185,7 @@ class CreateSound(Sound):
         sustain_frames = attack_sustain_release[1] * SAMPLE_RATE
         release_frames = attack_sustain_release[2] * SAMPLE_RATE
         total_frames = attack_frames + sustain_frames + release_frames
-        current_volume = 0.0
+        current_volume = 1
 
         for frame in xrange(int(total_frames)):
             if frame < attack_frames:
@@ -187,14 +196,15 @@ class CreateSound(Sound):
                 current_volume = BIT_DEPTH
 
             pure_tone_frame = math.sin(frame * frequency / SAMPLE_RATE) * current_volume * 2.0 * math.pi * volume
-            self.new_values_list.append(struct.pack("<h", clamp(pure_tone_frame)))
+            self.new_values_list.append(pure_tone_frame)
+        return (self.new_values_list)
 
-        self.file.writeframes(''.join(self.new_values_list))
 
     def play_song(self, notes_list, attack_sustain_release):
         for note in notes_list:
-            self.sound_envelope(notes[note], attack_sustain_release)
-        winsound.PlaySound(self.name, winsound.SND_FILENAME)
+            final_list = self.sound_envelope(notes[note], attack_sustain_release)
+        return final_list
+
 
 
 def Teleport():
@@ -235,17 +245,18 @@ walking_instance = CreateSound('walking.wav')
 #walking_instance.play_song(walking_list, medium)
 
 raptor_growl = CreateSound('rapgrowl.wav')
-#raptor_growl.play_song(growl_list, quickest)
+raptor_growl.play_song(growl_list, quickest)
 
 equip = CreateSound('equip.wav')
 #equip.play_song(equip_list, equip_speed)
 
 headphone_killer = CreateSound('fubar.wav')
-headphone_killer.sound_envelope(custom_note(80), slow)
+
 #winsound.PlaySound(headphone_killer.name, winsound.SND_FILENAME)
 
-
-Make_Sound.write_file(Teleport(),"file_name")
+Make_Sound.write_file((new_gun.sound_envelope(custom_note(-9), gunshot_speed)),"testme.wav" )
+Make_Sound.write_file(Teleport(),"teleport.wav")
 Make_Sound.write_file(echo(Teleport()),"echo.wav")
+Make_Sound.write_file(raptor_growl.play_song(growl_list, quickest), "testmetoo.wav")
 
 
