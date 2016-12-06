@@ -63,6 +63,7 @@ notes = {'A' : 440 * math.pow(2, 0.0/12.0),
          'F#': 440 * math.pow(2, 9.0/12.0),
          'G' : 440 * math.pow(2, 10.0/12.0),
          'G#': 440 * math.pow(2, 11.0/12.0),
+
          'gunshot': 440 * math.pow(2, 5),
          'growl_1': 440 * math.pow(2, 3),
          'growl_2': 440 * math.pow(2, 1.5),
@@ -166,6 +167,7 @@ class LoadSound(Sound):
         return new_value_list
 
     def auto_tune(self, step_magnitude):
+        """This is for volume idiot"""
         values_list = self.read_file()
         new_values_list = []
         for i in xrange(self.file.getnframes()):
@@ -222,7 +224,7 @@ class CreateSound(Sound):
         winsound.PlaySound(self.name, winsound.SND_FILENAME)
 
 
-def Teleport():
+def teleport():
     """doc string"""
     value_list = []
     for i in xrange(0,SAMPLE_LENGTH):
@@ -243,7 +245,7 @@ def echo(list):
         counter += 1
     return new_list
 
-Make_Sound = Sound()
+make_Sound = Sound()
 
 # gunshot = CreateSound('gunshot.wav')
 # gunshot.sound_envelope(custom_note(-9), gunshot_speed)
@@ -276,7 +278,7 @@ headphone_killer.sound_envelope(custom_note(80), slow)
 #winsound.PlaySound(headphone_killer.name, winsound.SND_FILENAME)
 
 
-Make_Sound.write_file(Teleport(),"teleport.wav")
-Make_Sound.write_file(echo(Teleport()),"echo.wav")
+make_Sound.write_file(teleport(),"teleport.wav")
+make_Sound.write_file(echo(teleport()),"echo.wav")
 
 
