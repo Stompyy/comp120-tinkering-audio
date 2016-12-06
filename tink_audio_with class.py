@@ -63,6 +63,7 @@ notes = {'A' : 440 * math.pow(2, 20/12.0),
          'F#': 440 * math.pow(2, 29.0/12.0),
          'G' : 440 * math.pow(2, 30.0/12.0),
          'G#': 440 * math.pow(2, 11.0/12.0),
+
          'gunshot': 440 * math.pow(2, 5),
          'growl_1': 440 * math.pow(2, 3),
          'growl_2': 440 * math.pow(2, 1.5),
@@ -101,10 +102,10 @@ quickest = (0.02, 0.0, 0.02)
 quick = (0.01, 0.3, 0.01)
 medium = (0.05, 0.1, 0.2)
 slow = (0.1, 0.2, 0.3)
-gunshot_speed = (0.,0.01,0.01)
+gunshot_speed = (0.0, 0.01, 0.01)
 equip_speed = (0.0, 0.1, 0.0)
-growl = (0.01,0.0,0.01)
-new_test = (0.0,0.,0.01)
+growl = (0.01, 0.0, 0.01)
+new_test = (0.0, 0.0, 0.01)
 
 
 def custom_note(n):
@@ -168,6 +169,7 @@ class LoadSound(Sound):
         return new_value_list
 
     def auto_tune(self, step_magnitude):
+        """This is for volume idiot"""
         values_list = self.read_file()
         new_values_list = []
         for i in xrange(self.file.getnframes()):
@@ -185,6 +187,7 @@ class CreateSound(Sound):
         self.name = name
         self.file.setparams((1, 2, 44100, 132300, 'NONE', 'not compressed'))
         self.temp_values_list = []
+
     def set_parameters(self, nchannels, sampwidth, framerate, nframes, comptype, compname):
         """sets the parameters of the .wav file"""
 
@@ -252,7 +255,7 @@ class CreateSound(Sound):
             counter += 1
         return new_list
 
-Make_Sound = Sound()
+make_Sound = Sound()
 create_sound = CreateSound("foo.wav")
 
 # gunshot = CreateSound('gunshot.wav')
@@ -286,5 +289,33 @@ create_sound = CreateSound("foo.wav")
 # #winsound.PlaySound(headphone_killer.name, winsound.SND_FILENAME)
 
 
-Make_Sound.write_file(create_sound.Teleport(),"teleport.wav")
-Make_Sound.write_file(create_sound.white_noise(), 'white_noise.wav')
+
+new_song = CreateSound('newsong.wav')
+#new_song.play_song(tense_list, quick)
+#new_song.play_song(tense_list, medium)
+
+gunshot = CreateSound('gunshot.wav')
+#gunshot.play_song(custom, gunshot_speed)
+
+walking_instance = CreateSound('walking.wav')
+#walking_instance.play_song(walking_list, medium)
+
+raptor_dead = CreateSound('rapgrowldead.wav')
+#raptor_dead.play_song(growl_dead, growl)
+
+raptor_alive = CreateSound('rapalive.wav')
+#raptor_alive.play_song(growl_alive, growl)
+
+equip = CreateSound('equip.wav')
+#equip.play_song(equip_list, equip_speed)
+
+overloard_roar = CreateSound('overlordroar.wav')
+overloard_roar.play_song(roar, growl)
+
+headphone_killer = CreateSound('fubar.wav')
+headphone_killer.sound_envelope(custom_note(80), slow)
+#winsound.PlaySound(headphone_killer.name, winsound.SND_FILENAME)
+
+
+make_Sound.write_file(create_sound.Teleport(),"teleport.wav")
+make_Sound.write_file(create_sound.white_noise(), 'white_noise.wav')
