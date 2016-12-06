@@ -1,4 +1,4 @@
-import wave, struct, sys, math, winsound, pygame
+import random, wave, struct, sys, math, winsound, pygame
 from pygame.locals import *
 
 """write a list of notes to play, and a tuple of the three time periods:
@@ -51,17 +51,17 @@ values = []
 new_file_frames = 132300
 
 
-notes = {'A' : 440 * math.pow(2, 0.0/12.0),
-         'Bb': 440 * math.pow(2, 1.0/12.0),
-         'B' : 440 * math.pow(2, 2.0/12.0),
-         'C' : 440 * math.pow(2, 3.0/12.0),
-         'C#': 440 * math.pow(2, 4.0/12.0),
-         'D' : 440 * math.pow(2, 5.0/12.0),
-         'D#': 440 * math.pow(2, 6.0/12.0),
-         'E' : 440 * math.pow(2, 7.0/12.0),
-         'F' : 440 * math.pow(2, 8.0/12.0),
-         'F#': 440 * math.pow(2, 9.0/12.0),
-         'G' : 440 * math.pow(2, 10.0/12.0),
+notes = {'A' : 440 * math.pow(2, 20/12.0),
+         'Bb': 440 * math.pow(2, 21/12.0),
+         'B' : 440 * math.pow(2, 22.0/12.0),
+         'C' : 440 * math.pow(2, 23.0/12.0),
+         'C#': 440 * math.pow(2, 24.0/12.0),
+         'D' : 440 * math.pow(2, 25.0/12.0),
+         'D#': 440 * math.pow(2, 26.0/12.0),
+         'E' : 440 * math.pow(2, 27.0/12.0),
+         'F' : 440 * math.pow(2, 28.0/12.0),
+         'F#': 440 * math.pow(2, 29.0/12.0),
+         'G' : 440 * math.pow(2, 30.0/12.0),
          'G#': 440 * math.pow(2, 11.0/12.0),
          'gunshot': 440 * math.pow(2, 5),
          'growl_1': 440 * math.pow(2, 3),
@@ -93,10 +93,12 @@ roar = ['roar_1', 'roar_1','roar_2', 'roar_2',
               'roar_2', 'roar_2', 'growl_3', 'roar_3', ]
 equip_list = ['B', 'E']
 
-
+song = ['E','F','G','C', 'D','E','F', 'G','A','B','F', 'A','A','B','C','D','E' ,'E','F','G','C', 'D','E','F', 'G',\
+        'A','B','F', 'A','A','B','C',\
+    'D','E', 'E','F','G','C', 'D','E','F', 'G','G','E','D', 'G','E','D', 'G','E','D', 'G','F','E','D','C']
 # Attack, sustain, release values
 quickest = (0.02, 0.0, 0.02)
-quick = (0.02, 0.03, 0.08)
+quick = (0.01, 0.3, 0.01)
 medium = (0.05, 0.1, 0.2)
 slow = (0.1, 0.2, 0.3)
 gunshot_speed = (0.,0.01,0.01)
@@ -221,62 +223,68 @@ class CreateSound(Sound):
             self.sound_envelope(notes[note], attack_sustain_release)
         winsound.PlaySound(self.name, winsound.SND_FILENAME)
 
+    def Teleport(self):
+        """doc string"""
+        value_list = []
+        for i in xrange(0, SAMPLE_LENGTH):
+            value_1 = math.sin(math.pi * FREQUENCY * 0.75 * (i / float(44100))) + math.sin(
+                math.pi / float(1.01) * FREQUENCY * 0.75 * (i / float(44100)))
+            value = (value_1 * (volume * BIT_DEPTH))
+            value_list.append(value)
+        return value_list
 
-def Teleport():
-    """doc string"""
-    value_list = []
-    for i in xrange(0,SAMPLE_LENGTH):
-        value_1 = math.sin(math.pi * FREQUENCY*0.75 * (i / float(44100))) + math.sin(
-            math.pi / float(1.01) * FREQUENCY*0.75 * (i / float(44100)))
-        value = (value_1 * (volume * BIT_DEPTH))
-        value_list.append(value)
-    return value_list
+    def white_noise(self):
+        """doc string"""
+        value_list = []
+        for i in xrange(0, SAMPLE_LENGTH):
+            value_1 = random.randrange(-BIT_DEPTH, BIT_DEPTH)
+            value_list.append(value_1)
+        return value_list
 
-def echo(list):
-    counter = 0
-    new_list = []
-    for i in list:
-        if counter < 6000:
-            new_list.append(i)
-        else:
-            new_list.append(((list[counter-1000])+ i))
-        counter += 1
-    return new_list
+    def echo(self, list):
+        counter = 0
+        new_list = []
+        for i in list:
+            if counter < 6000:
+                new_list.append(i)
+            else:
+                new_list.append(((list[counter - 1000]) + i))
+            counter += 1
+        return new_list
 
 Make_Sound = Sound()
+create_sound = CreateSound("foo.wav")
 
 # gunshot = CreateSound('gunshot.wav')
 # gunshot.sound_envelope(custom_note(-9), gunshot_speed)
 #winsound.PlaySound(new_gun.name, winsound.SND_FILENAME)
 
-new_song = CreateSound('newsong.wav')
-#new_song.play_song(tense_list, quick)
-#new_song.play_song(tense_list, medium)
-
-gunshot = CreateSound('gunshot.wav')
-#gunshot.play_song(custom, gunshot_speed)
-
-walking_instance = CreateSound('walking.wav')
-#walking_instance.play_song(walking_list, medium)
-
-raptor_dead = CreateSound('rapgrowldead.wav')
-#raptor_dead.play_song(growl_dead, growl)
-
-raptor_alive = CreateSound('rapalive.wav')
-#raptor_alive.play_song(growl_alive, growl)
-
-equip = CreateSound('equip.wav')
-#equip.play_song(equip_list, equip_speed)
-
-overloard_roar = CreateSound('overlordroar.wav')
-overloard_roar.play_song(roar, growl)
-
-headphone_killer = CreateSound('fubar.wav')
-headphone_killer.sound_envelope(custom_note(80), slow)
-#winsound.PlaySound(headphone_killer.name, winsound.SND_FILENAME)
-
-
-Make_Sound.write_file(Teleport(),"teleport.wav")
-Make_Sound.write_file(echo(Teleport()),"echo.wav")
+# new_song = CreateSound('newsong.wav')
+# new_song.play_song(song, quick)
+# #new_song.play_song(tense_list, medium)
+#
+# gunshot = CreateSound('gunshot.wav')
+# #gunshot.play_song(custom, gunshot_speed)
+#
+# walking_instance = CreateSound('walking.wav')
+# #walking_instance.play_song(walking_list, medium)
+#
+# raptor_dead = CreateSound('rapgrowldead.wav')
+# #raptor_dead.play_song(growl_dead, growl)
+#
+# raptor_alive = CreateSound('rapalive.wav')
+# #raptor_alive.play_song(growl_alive, growl)
+#
+# equip = CreateSound('equip.wav')
+# #equip.play_song(equip_list, equip_speed)
+#
+# overloard_roar = CreateSound('overlordroar.wav')
+# #overloard_roar.play_song(roar, growl)
+#
+# headphone_killer = CreateSound('fubar.wav')
+# headphone_killer.sound_envelope(custom_note(80), slow)
+# #winsound.PlaySound(headphone_killer.name, winsound.SND_FILENAME)
 
 
+Make_Sound.write_file(create_sound.Teleport(),"teleport.wav")
+Make_Sound.write_file(create_sound.white_noise(), 'white_noise.wav')
