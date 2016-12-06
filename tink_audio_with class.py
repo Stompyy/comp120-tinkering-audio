@@ -96,14 +96,14 @@ equip_list = ['B', 'E']
 
 
 # Attack, sustain, release values
-quickest = (0.02, 0.0, 0.02)
+quickest = (0.02, 0.02, 0.02)
 quick = (0.02, 0.03, 0.08)
 medium = (0.05, 0.1, 0.2)
 slow = (0.1, 0.2, 0.3)
-gunshot_speed = (0.,0.01,0.01)
+gunshot_speed = (0.0, 0.01, 0.01)
 equip_speed = (0.0, 0.1, 0.0)
-growl = (0.01,0.0,0.01)
-new_test = (0.0,0.,0.01)
+growl = (0.01, 0.0, 0.01)
+new_test = (0.0, 0.0, 0.01)
 
 
 def custom_note(n):
@@ -185,6 +185,7 @@ class CreateSound(Sound):
         self.name = name
         self.file.setparams((1, 2, 44100, 132300, 'NONE', 'not compressed'))
         self.temp_values_list = []
+
     def set_parameters(self, nchannels, sampwidth, framerate, nframes, comptype, compname):
         """sets the parameters of the .wav file"""
 
@@ -233,6 +234,7 @@ def teleport():
         value = (value_1 * (volume * BIT_DEPTH))
         value_list.append(value)
     return value_list
+
 
 def echo(list):
     counter = 0
