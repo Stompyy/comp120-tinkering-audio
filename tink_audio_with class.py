@@ -223,17 +223,21 @@ class CreateSound(Sound):
         return half_list
 
     def additive(self, list_one, list_two):
+        """Trying to add to waves together..."""
         overlapped_list = []
+
+        # gets the shortest list length so doesn't go list out of bounds error
         if len(list_one) < len(list_two):
             overlapped_list_length = len(list_one)
         else:
             overlapped_list_length = len(list_two)
 
+        # adds them before normalising result
         for i in xrange(overlapped_list_length):
             overlapped_list.append(list_one + list_two)
 
         return self.normalise(overlapped_list)
-    
+
 
 make_Sound = Sound()
 create_sound = CreateSound("foo.wav")
