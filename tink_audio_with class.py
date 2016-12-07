@@ -1,38 +1,6 @@
 import random, wave, struct, sys, math, winsound, pygame
 from pygame.locals import *
 
-"""write a list of notes to play, and a tuple of the three time periods:
-    ________
-  /         \
- /           \
-/             \
-attack
-    sustain
-        release
-e.g. (0.2, 0.5, 0.4)
-
-Declare an instance of CreateSound('filename.wav')
-then:
-instance.play_sound(notes_list, tuple)
-You'll see at the end
-Can't get anything to sound decent though
-probably not imaginative enough
-
-Alternatively can create a custom note with def custom_note(n)
-where if n > 12 gets very high pitched or n < 0 very low
-
-instance.sound_envelope(frequency, tuple) creates the sine wave so maybe
-directly messing with the frequency argument will be best for gunshots etc.
-Need to tell it to play like with new_gun instance below at the bottom.
-
-easy enough but annoyingly difficult to get anything to sound decent
-
-volume is an outside variable: volume
-Didn't see any need to pass it into sound_envelope function as an argument
-but it's easily enough done. Volume is multiplied in the pure_tone_frame = ... line
-just careful not to mix it up with the current_volume variable. That's the
-envelope bit.
-"""
 
 pygame.init()
 pygame.mixer.init()
@@ -244,16 +212,22 @@ class CreateSound(Sound):
             value_list.append(value_1)
         return value_list
 
-    def echo(self, list):
-        counter = 0
-        new_list = []
-        for i in list:
-            if counter < 6000:
-                new_list.append(i)
-            else:
-                new_list.append(((list[counter - 1000]) + i))
-            counter += 1
-        return new_list
+    def double(self, list):
+        double_list = []
+        for i in xrange(0,len(list),2):
+            double_list.append(list[i])
+        return double_list
+
+    def half(self, list):
+        half_list = []
+        for i in xrange(0,len(list)):
+            half_list.append(list[i-1])
+            half_list.append(list[i])
+        return half_list
+
+
+
+
 
 make_Sound = Sound()
 create_sound = CreateSound("foo.wav")
@@ -317,5 +291,7 @@ headphone_killer.sound_envelope(custom_note(80), slow)
 #winsound.PlaySound(headphone_killer.name, winsound.SND_FILENAME)
 
 
+make_Sound.write_file(create_sound.half(create_sound.Teleport()),"teleport1.wav")
 make_Sound.write_file(create_sound.Teleport(),"teleport.wav")
 make_Sound.write_file(create_sound.white_noise(), 'white_noise.wav')
+make_Sound.write_file(create_sound.double(create_sound.Teleport()), 'teleport2.wav')
