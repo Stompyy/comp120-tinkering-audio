@@ -222,6 +222,19 @@ class CreateSound(Sound):
             half_list.append(list[i])
         return half_list
 
+    def additive(self, list_one, list_two):
+        overlapped_list = []
+        if len(list_one) < len(list_two):
+            overlapped_list_length = len(list_one)
+        else:
+            overlapped_list_length = len(list_two)
+
+        for i in xrange(overlapped_list_length):
+            overlapped_list.append(list_one + list_two)
+
+        return self.normalise(overlapped_list)
+    
+
 make_Sound = Sound()
 create_sound = CreateSound("foo.wav")
 
@@ -287,3 +300,4 @@ make_Sound.write_file(create_sound.half(create_sound.Teleport()),"teleport1.wav"
 make_Sound.write_file(create_sound.Teleport(),"teleport.wav")
 make_Sound.write_file(create_sound.white_noise(), 'white_noise.wav')
 make_Sound.write_file(create_sound.double(create_sound.Teleport()), 'teleport2.wav')
+make_Sound.write_file(create_sound.additive(LoadSound('teleport1.wav').read_file(), LoadSound('teleport2.wav').read_file()), 'woop.wav')
