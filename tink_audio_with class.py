@@ -62,8 +62,8 @@ roar = ['roar_1', 'roar_1','roar_2', 'roar_2',
               'roar_2', 'roar_2', 'growl_3', 'roar_3', ]
 equip_list = ['B', 'E']
 
-song = ['E','F','G','C', 'D','E','F', 'G','A','B','F', 'A','A','B','C','D','E' ,'E','F','G','C', 'D','E','F', 'G',\
-        'A','B','F', 'A','A','B','C',\
+song = ['E','F','G','C', 'D','E','F', 'G','A','B','F', 'A','A','B','C','D','E' ,'E','F','G','C', 'D','E','F', 'G',
+        'A','B','F', 'A','A','B','C',
     'D','E', 'E','F','G','C', 'D','E','F', 'G','G','E','D', 'G','E','D', 'G','E','D', 'G','F','E','D','C']
 # Attack, sustain, release values
 quickest = (0.02, 0.0, 0.02)
@@ -79,23 +79,6 @@ new_test = (0.0, 0.0, 0.01)
 def custom_note(n):
     return 440 * math.pow(2, n/12.0)
 
-def clamp(value_list):
-    biggest_value = 0
-    lowest_value = 0
-    clamped_list = []
-    for i in value_list:
-        if i > biggest_value:
-            biggest_value = i
-        if i < lowest_value:
-            lowest_value = i
-    if biggest_value > -lowest_value:
-        multiplier = BIT_DEPTH / biggest_value
-    if -lowest_value > biggest_value:
-        multiplier = BIT_DEPTH / -lowest_value
-    for i in value_list:
-        clamped_list.append(i * multiplier)
-    return clamped_list
-
 
 class Sound:
 
@@ -107,6 +90,23 @@ class Sound:
             packed_value = (struct.pack("<h", value))
             self.file.writeframes(packed_value)
         self.file.close()
+
+    def normalise(self, list):          # individual figures are passed into this not a list?
+        biggest_value = 0
+        lowest_value = 0
+        clamped_list = []
+        for i in list:                  # fine as it just sees value as a list of length one
+            if i > biggest_value:
+                biggest_value = i
+            if i < lowest_value:
+                lowest_value = i
+        if biggest_value > -lowest_value:
+            multiplier = BIT_DEPTH / biggest_value
+        if -lowest_value > biggest_value:
+            multiplier = BIT_DEPTH / -lowest_value
+        for i in list:
+            clamped_list.append(i * multiplier)
+        return clamped_list
 
 
 class LoadSound(Sound):
@@ -133,7 +133,7 @@ class LoadSound(Sound):
             if i < echo_length:
                 new_value_list.append(values_list[i])
             else:
-                new_value_list.append(clamp(values_list[i] + values_list[i - echo_length]))
+                new_value_list.append(self.normalise(values_list[i] + values_list[i - echo_length]))
         return new_value_list
 
     def auto_tune(self, step_magnitude):
@@ -185,7 +185,6 @@ class CreateSound(Sound):
         for i in self.temp_values_list:
             packed_value = (struct.pack("<h", i))
             self.new_values_list.append(packed_value)
-
 
         self.file.writeframes(''.join(self.new_values_list))
 
