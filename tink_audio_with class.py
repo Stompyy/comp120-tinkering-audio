@@ -46,9 +46,9 @@ scale = ['A','Bb', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
 wonderwall = ['E', 'E', 'G', 'G', 'D', 'D', 'A', 'A']
 come_as_you_are = ['E', 'E', 'F', 'F#', 'F#', 'A', 'F#', 'A', 'F#', 'F#', 'F', 'E', 'E', 'B', 'E', 'B']
 tense_list = ['G', 'F#', 'F', 'E',
-                 'G', 'F#', 'F', 'E',
-                 'G', 'F#', 'F', 'E',
-                 'G', 'F#', 'F', 'E',]
+              'G', 'F#', 'F', 'E',
+              'G', 'F#', 'F', 'E',
+              'G', 'F#', 'F', 'E',]
 walking_list = ['F', 'E',
                 'F', 'E',
                 'F', 'E',
@@ -77,11 +77,12 @@ new_test = (0.0, 0.0, 0.01)
 
 
 def custom_note(n):
+    """to create a custom frequency key outside of the dictionary of standard notes"""
     return 440 * math.pow(2, n/12.0)
 
 
 class Sound:
-
+    """Super class for sound classes"""
     def write_file(self, values_list, file_name):
         self.file = wave.open(file_name, 'w')
         self.file.setparams((1, 2, 44100, 132300, 'NONE', 'not compressed'))
@@ -91,11 +92,12 @@ class Sound:
             self.file.writeframes(packed_value)
         self.file.close()
 
-    def normalise(self, list):          # individual figures are passed into this not a list?
+    def normalise(self, list):
+        multiplier = 0
         biggest_value = 0
         lowest_value = 0
         clamped_list = []
-        for i in list:                  # fine as it just sees value as a list of length one
+        for i in list:
             if i > biggest_value:
                 biggest_value = i
             if i < lowest_value:
@@ -110,6 +112,7 @@ class Sound:
 
 
 class LoadSound(Sound):
+    """Loads a sound file of name 'name.wav' to add effects to with functions"""
     def __init__(self, name):
         """loads the file"""
         self.file = wave.open(name, "rb")
@@ -133,8 +136,9 @@ class LoadSound(Sound):
             if i < echo_length:
                 new_value_list.append(values_list[i])
             else:
-                new_value_list.append(self.normalise(values_list[i] + values_list[i - echo_length]))
-        return new_value_list
+                new_value_list.append(values_list[i] + values_list[i - echo_length])
+
+        return self.normalise(new_value_list)
 
     def auto_tune(self, step_magnitude):
         """This is for volume idiot"""
@@ -156,12 +160,6 @@ class CreateSound(Sound):
         self.file.setparams((1, 2, 44100, 132300, 'NONE', 'not compressed'))
         self.temp_values_list = []
 
-    def set_parameters(self, nchannels, sampwidth, framerate, nframes, comptype, compname):
-        """sets the parameters of the .wav file"""
-
-        # probably unnecessary to have in a function. Just do after creating an instance
-        self.file.setparams((nchannels, sampwidth, framerate, nframes, comptype, compname))
-
     def sound_envelope(self, frequency, attack_sustain_release):
         self.new_values_list = []
         attack_frames = attack_sustain_release[0] * SAMPLE_RATE
@@ -181,7 +179,7 @@ class CreateSound(Sound):
             pure_tone_frame = math.sin(frame * frequency / SAMPLE_RATE) * current_volume * 2.0 * math.pi * volume
             self.temp_values_list.append(pure_tone_frame)
 
-        self.temp_values_list = clamp(self.temp_values_list)
+        self.temp_values_list = self.normalise(self.temp_values_list)
         for i in self.temp_values_list:
             packed_value = (struct.pack("<h", i))
             self.new_values_list.append(packed_value)
@@ -224,10 +222,6 @@ class CreateSound(Sound):
             half_list.append(list[i])
         return half_list
 
-
-
-
-
 make_Sound = Sound()
 create_sound = CreateSound("foo.wav")
 
@@ -260,7 +254,6 @@ create_sound = CreateSound("foo.wav")
 # headphone_killer = CreateSound('fubar.wav')
 # headphone_killer.sound_envelope(custom_note(80), slow)
 # #winsound.PlaySound(headphone_killer.name, winsound.SND_FILENAME)
-
 
 
 new_song = CreateSound('newsong.wav')
