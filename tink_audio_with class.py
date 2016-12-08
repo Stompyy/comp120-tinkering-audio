@@ -112,7 +112,7 @@ class Sound:
 class LoadSound(Sound):
     def __init__(self, name):
         """loads the file"""
-        self.file = wave.open(name, "rb")
+        self.file = wave.open(name, "r")
 
     def read_file(self):
         """returns an unpacked list of values of the sound wave"""
@@ -121,7 +121,7 @@ class LoadSound(Sound):
 
         for i in xrange(self.file.getnframes()):
             current_frame = self.file.readframes(1)
-            unpacked_frame = struct.unpack("<h", current_frame)
+            unpacked_frame = struct.unpack("i", current_frame)
             unpacked_list.append(unpacked_frame[0])
 
         return unpacked_list
@@ -225,10 +225,22 @@ class CreateSound(Sound):
             half_list.append(list[i])
         return half_list
 
+    def echo_two(self, list):
+        counter = 0
+        new_list = []
+        for i in list:
+            counter += 1
+            if counter < 10000:
+                value = i
+            else:
+                value = i + (list[counter-10000] * 0.4)
+            new_list.append(value)
+        return clamp(new_list)
 
 
 
 
+noob = LoadSound('richisgay.wav')
 make_Sound = Sound()
 create_sound = CreateSound("foo.wav")
 
@@ -268,6 +280,7 @@ new_song = CreateSound('newsong.wav')
 #new_song.play_song(tense_list, quick)
 #new_song.play_song(tense_list, medium)
 
+
 gunshot = CreateSound('gunshot.wav')
 #gunshot.play_song(custom, gunshot_speed)
 
@@ -291,7 +304,8 @@ headphone_killer.sound_envelope(custom_note(80), slow)
 #winsound.PlaySound(headphone_killer.name, winsound.SND_FILENAME)
 
 
-make_Sound.write_file(create_sound.half(create_sound.Teleport()),"teleport1.wav")
-make_Sound.write_file(create_sound.Teleport(),"teleport.wav")
-make_Sound.write_file(create_sound.white_noise(), 'white_noise.wav')
-make_Sound.write_file(create_sound.double(create_sound.Teleport()), 'teleport2.wav')
+# make_Sound.write_file(create_sound.half(create_sound.Teleport()),"teleport1.wav")
+# make_Sound.write_file(create_sound.Teleport(),"teleport.wav")
+# make_Sound.write_file(create_sound.white_noise(), 'white_noise.wav')
+# make_Sound.write_file(create_sound.double(create_sound.Teleport()), 'teleport2.wav')
+make_Sound.write_file(create_sound.echo_two(noob.read_file()), "philisgay.wav")
