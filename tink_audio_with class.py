@@ -142,7 +142,7 @@ class LoadSound(Sound):
             current_frame = self.file.readframes(1)
             unpacked_frame = struct.unpack("<h", current_frame)
             unpacked_list.append(unpacked_frame[0])
-
+        print unpacked_list
         return unpacked_list
 
     def echo(self, echo_length):
@@ -239,8 +239,6 @@ class CreateSound(Sound):
         return half_list
 
 
-
-
 make_Sound = Sound()
 create_sound = CreateSound("foo.wav")
 gunshot = CreateSound('gunshot.wav')
@@ -309,6 +307,11 @@ make_Sound.write_file(create_sound.additive(create_sound.Teleport(),
                                             create_sound.double(create_sound.Teleport())),
                                             'teleport3.wav')
 
-#winsound.PlaySound('teleport1.wav', winsound.SND_FILENAME)
+make_Sound.write_file(create_sound.additive(LoadSound('teleport.wav').read_file(),
+                                            LoadSound('teleport1.wav').read_file()), 'new2.wav')
+
+
+
+winsound.PlaySound('new2.wav', winsound.SND_FILENAME)
 #winsound.PlaySound('teleport2.wav', winsound.SND_FILENAME)
-winsound.PlaySound('teleport3.wav', winsound.SND_FILENAME)
+#winsound.PlaySound('teleport3.wav', winsound.SND_FILENAME)
