@@ -234,7 +234,7 @@ class CreateSound(Sound):
 
         # adds them before normalising result
         for i in xrange(overlapped_list_length):
-            overlapped_list.append(list_one + list_two)
+            overlapped_list.append(list_one[i] + list_two[i])
 
         return self.normalise(overlapped_list)
 
@@ -293,7 +293,7 @@ equip = CreateSound('equip.wav')
 #equip.play_song(equip_list, equip_speed)
 
 overloard_roar = CreateSound('overlordroar.wav')
-overloard_roar.play_song(roar, growl)
+#overloard_roar.play_song(roar, growl)
 
 headphone_killer = CreateSound('fubar.wav')
 headphone_killer.sound_envelope(custom_note(80), slow)
@@ -304,4 +304,7 @@ make_Sound.write_file(create_sound.half(create_sound.Teleport()),"teleport1.wav"
 make_Sound.write_file(create_sound.Teleport(),"teleport.wav")
 make_Sound.write_file(create_sound.white_noise(), 'white_noise.wav')
 make_Sound.write_file(create_sound.double(create_sound.Teleport()), 'teleport2.wav')
-make_Sound.write_file(create_sound.additive(LoadSound('teleport1.wav').read_file(), LoadSound('teleport2.wav').read_file()), 'woop.wav')
+make_Sound.write_file(create_sound.additive(
+    LoadSound('teleport1.wav').read_file(),
+    LoadSound('teleport2.wav').read_file()),
+    'woop.wav')
