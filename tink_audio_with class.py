@@ -131,7 +131,7 @@ class LoadSound(Sound):
     """Loads a sound file of name 'name.wav' to add effects to with functions"""
     def __init__(self, name):
         """loads the file"""
-        self.file = wave.open(name, "rb")
+        self.file = wave.open(name, "r")
 
     def read_file(self):
         """returns an unpacked list of values of the sound wave"""
@@ -140,7 +140,7 @@ class LoadSound(Sound):
 
         for i in xrange(self.file.getnframes()):
             current_frame = self.file.readframes(1)
-            unpacked_frame = struct.unpack("<h", current_frame)
+            unpacked_frame = struct.unpack("i", current_frame)
             unpacked_list.append(unpacked_frame[0])
         print unpacked_list
         return unpacked_list
@@ -238,6 +238,17 @@ class CreateSound(Sound):
             half_list.append(list[i])
         return half_list
 
+    def echo_two(self, list):
+        counter = 0
+        new_list = []
+        for i in list:
+            counter += 1
+            if counter < 10000:
+                value = i
+            else:
+                value = i + (list[counter-10000] * 0.4)
+            new_list.append(value)
+        return self.normalise(new_list)
 
 make_Sound = Sound()
 create_sound = CreateSound("foo.wav")
@@ -255,6 +266,9 @@ gunshot.sound_envelope(custom_note(-9), gunshot_speed)
 #walking_instance = CreateSound('walking.wav')
 #walking_instance.play_song(walking_list, medium)
 
+noob = LoadSound('richisgay.wav')
+make_Sound = Sound()
+create_sound = CreateSound("foo.wav")
 #raptor_dead = CreateSound('rapgrowldead.wav')
 #raptor_dead.play_song(growl_dead, growl)
 
@@ -296,18 +310,47 @@ gunshot.sound_envelope(custom_note(-9), gunshot_speed)
 #
 # headphone_killer = CreateSound('fubar.wav')
 # headphone_killer.sound_envelope(custom_note(80), slow)
+# #winsound.PlaySound(headphone_killer.name, winsound.SND_FILENAME)
+
+
+
+new_song = CreateSound('newsong.wav')
+#new_song.play_song(tense_list, quick)
+#new_song.play_song(tense_list, medium)
+
+
+gunshot = CreateSound('gunshot.wav')
+#gunshot.play_song(custom, gunshot_speed)
+
+walking_instance = CreateSound('walking.wav')
+#walking_instance.play_song(walking_list, medium)
+
+raptor_dead = CreateSound('rapgrowldead.wav')
+#raptor_dead.play_song(growl_dead, growl)
+
+raptor_alive = CreateSound('rapalive.wav')
+#raptor_alive.play_song(growl_alive, growl)
 # winsound.PlaySound(headphone_killer.name, winsound.SND_FILENAME)
 #
 make_Sound.write_file(create_sound.half(create_sound.Teleport()),"teleport1.wav")
 make_Sound.write_file(create_sound.Teleport(),"teleport.wav")
 make_Sound.write_file(create_sound.white_noise(), 'white_noise.wav')
 make_Sound.write_file(create_sound.double(create_sound.Teleport()), 'teleport2.wav')
-
 make_Sound.write_file(create_sound.additive(create_sound.Teleport(),
                                             create_sound.double(create_sound.Teleport())),
                                             'teleport3.wav')
 
+<<<<<<< .mine
 
+
+
+=======
+#make_Sound.write_file(create_sound.additive(LoadSound('teleport.wav').read_file(),
+                                            #LoadSound('teleport1.wav').read_file()), 'new2.wav')
+make_Sound.write_file(create_sound.echo_two(noob.read_file()), "philisgay.wav")
+>>>>>>> .theirs
+
+<<<<<<< .mine
 instance1 = LoadSound('teleport.wav')
 instance2 = LoadSound('teleport1.wav')
 new_meh = CreateSound('new_meh.wav')
@@ -320,3 +363,17 @@ make_Sound.write_file(new_meh.additive(instance1.read_file(),
 #winsound.PlaySound('new2.wav', winsound.SND_FILENAME)
 #winsound.PlaySound('teleport2.wav', winsound.SND_FILENAME)
 #winsound.PlaySound('teleport3.wav', winsound.SND_FILENAME)
+=======
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> .theirs
