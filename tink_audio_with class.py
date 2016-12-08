@@ -46,9 +46,9 @@ scale = ['A','Bb', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
 wonderwall = ['E', 'E', 'G', 'G', 'D', 'D', 'A', 'A']
 come_as_you_are = ['E', 'E', 'F', 'F#', 'F#', 'A', 'F#', 'A', 'F#', 'F#', 'F', 'E', 'E', 'B', 'E', 'B']
 tense_list = ['G', 'F#', 'F', 'E',
-                 'G', 'F#', 'F', 'E',
-                 'G', 'F#', 'F', 'E',
-                 'G', 'F#', 'F', 'E',]
+              'G', 'F#', 'F', 'E',
+              'G', 'F#', 'F', 'E',
+              'G', 'F#', 'F', 'E',]
 walking_list = ['F', 'E',
                 'F', 'E',
                 'F', 'E',
@@ -62,8 +62,8 @@ roar = ['roar_1', 'roar_1','roar_2', 'roar_2',
               'roar_2', 'roar_2', 'growl_3', 'roar_3', ]
 equip_list = ['B', 'E']
 
-song = ['E','F','G','C', 'D','E','F', 'G','A','B','F', 'A','A','B','C','D','E' ,'E','F','G','C', 'D','E','F', 'G',\
-        'A','B','F', 'A','A','B','C',\
+song = ['E','F','G','C', 'D','E','F', 'G','A','B','F', 'A','A','B','C','D','E' ,'E','F','G','C', 'D','E','F', 'G',
+        'A','B','F', 'A','A','B','C',
     'D','E', 'E','F','G','C', 'D','E','F', 'G','G','E','D', 'G','E','D', 'G','E','D', 'G','F','E','D','C']
 # Attack, sustain, release values
 quickest = (0.02, 0.0, 0.02)
@@ -77,28 +77,12 @@ new_test = (0.0, 0.0, 0.01)
 
 
 def custom_note(n):
+    """to create a custom frequency key outside of the dictionary of standard notes"""
     return 440 * math.pow(2, n/12.0)
-
-def clamp(value_list):
-    biggest_value = 0
-    lowest_value = 0
-    clamped_list = []
-    for i in value_list:
-        if i > biggest_value:
-            biggest_value = i
-        if i < lowest_value:
-            lowest_value = i
-    if biggest_value > -lowest_value:
-        multiplier = BIT_DEPTH / biggest_value
-    if -lowest_value > biggest_value:
-        multiplier = BIT_DEPTH / -lowest_value
-    for i in value_list:
-        clamped_list.append(i * multiplier)
-    return clamped_list
 
 
 class Sound:
-
+    """Super class for sound classes"""
     def write_file(self, values_list, file_name):
         self.file = wave.open(file_name, 'w')
         self.file.setparams((1, 2, 44100, 132300, 'NONE', 'not compressed'))
@@ -108,8 +92,43 @@ class Sound:
             self.file.writeframes(packed_value)
         self.file.close()
 
+    def normalise(self, list):
+        multiplier = 0
+        biggest_value = 0
+        lowest_value = 0
+        clamped_list = []
+        for i in list:
+            if i > biggest_value:
+                biggest_value = i
+            if i < lowest_value:
+                lowest_value = i
+        if biggest_value > -lowest_value:
+            multiplier = BIT_DEPTH / biggest_value
+        if -lowest_value > biggest_value:
+            multiplier = BIT_DEPTH / -lowest_value
+        for i in list:
+            clamped_list.append(i * multiplier)
+        return clamped_list
+
+    def additive(self, list_one, list_two):
+        """Trying to add to waves together..."""
+        overlapped_list = []
+
+        # gets the shortest list length so doesn't go list out of bounds error
+        if len(list_one) < len(list_two):
+            overlapped_list_length = len(list_one)
+        else:
+            overlapped_list_length = len(list_two)
+
+        # adds them before normalising result
+        for i in xrange(0, overlapped_list_length):
+            overlapped_list.append(list_one[i] + list_two[i])
+
+        return self.normalise(overlapped_list)
+
 
 class LoadSound(Sound):
+    """Loads a sound file of name 'name.wav' to add effects to with functions"""
     def __init__(self, name):
         """loads the file"""
         self.file = wave.open(name, "r")
@@ -123,7 +142,7 @@ class LoadSound(Sound):
             current_frame = self.file.readframes(1)
             unpacked_frame = struct.unpack("i", current_frame)
             unpacked_list.append(unpacked_frame[0])
-
+        print unpacked_list
         return unpacked_list
 
     def echo(self, echo_length):
@@ -133,8 +152,9 @@ class LoadSound(Sound):
             if i < echo_length:
                 new_value_list.append(values_list[i])
             else:
-                new_value_list.append(clamp(values_list[i] + values_list[i - echo_length]))
-        return new_value_list
+                new_value_list.append(values_list[i] + values_list[i - echo_length])
+
+        return self.normalise(new_value_list)
 
     def auto_tune(self, step_magnitude):
         """This is for volume idiot"""
@@ -156,12 +176,6 @@ class CreateSound(Sound):
         self.file.setparams((1, 2, 44100, 132300, 'NONE', 'not compressed'))
         self.temp_values_list = []
 
-    def set_parameters(self, nchannels, sampwidth, framerate, nframes, comptype, compname):
-        """sets the parameters of the .wav file"""
-
-        # probably unnecessary to have in a function. Just do after creating an instance
-        self.file.setparams((nchannels, sampwidth, framerate, nframes, comptype, compname))
-
     def sound_envelope(self, frequency, attack_sustain_release):
         self.new_values_list = []
         attack_frames = attack_sustain_release[0] * SAMPLE_RATE
@@ -181,11 +195,10 @@ class CreateSound(Sound):
             pure_tone_frame = math.sin(frame * frequency / SAMPLE_RATE) * current_volume * 2.0 * math.pi * volume
             self.temp_values_list.append(pure_tone_frame)
 
-        self.temp_values_list = clamp(self.temp_values_list)
+        self.temp_values_list = self.normalise(self.temp_values_list)
         for i in self.temp_values_list:
             packed_value = (struct.pack("<h", i))
             self.new_values_list.append(packed_value)
-
 
         self.file.writeframes(''.join(self.new_values_list))
 
@@ -198,8 +211,8 @@ class CreateSound(Sound):
         """doc string"""
         value_list = []
         for i in xrange(0, SAMPLE_LENGTH):
-            value_1 = math.sin(math.pi * FREQUENCY * 0.75 * (i / float(44100))) + math.sin(
-                math.pi / float(1.01) * FREQUENCY * 0.75 * (i / float(44100)))
+            value_1 = math.sin(math.pi * FREQUENCY * 0.75 * (i / float(SAMPLE_RATE))) + math.sin(
+                math.pi / float(1.01) * FREQUENCY * 0.75 * (i / float(SAMPLE_RATE)))
             value = (value_1 * (volume * BIT_DEPTH))
             value_list.append(value)
         return value_list
@@ -235,40 +248,65 @@ class CreateSound(Sound):
             else:
                 value = i + (list[counter-10000] * 0.4)
             new_list.append(value)
-        return clamp(new_list)
+        return self.normalise(new_list)
 
+make_Sound = Sound()
+create_sound = CreateSound("foo.wav")
+gunshot = CreateSound('gunshot.wav')
+gunshot.sound_envelope(custom_note(-9), gunshot_speed)
+#winsound.PlaySound(new_gun.name, winsound.SND_FILENAME)
 
+#new_song = CreateSound('newsong.wav')
+#new_song.play_song(song, quick)
+#new_song.play_song(tense_list, medium)
 
+#gunshot = CreateSound('gunshot.wav')
+#gunshot.play_song(custom, gunshot_speed)
+#
+#walking_instance = CreateSound('walking.wav')
+#walking_instance.play_song(walking_list, medium)
 
 noob = LoadSound('richisgay.wav')
 make_Sound = Sound()
 create_sound = CreateSound("foo.wav")
+#raptor_dead = CreateSound('rapgrowldead.wav')
+#raptor_dead.play_song(growl_dead, growl)
 
-# gunshot = CreateSound('gunshot.wav')
-# gunshot.sound_envelope(custom_note(-9), gunshot_speed)
-#winsound.PlaySound(new_gun.name, winsound.SND_FILENAME)
+#raptor_alive = CreateSound('rapalive.wav')
+#raptor_alive.play_song(growl_alive, growl)
 
-# new_song = CreateSound('newsong.wav')
-# new_song.play_song(song, quick)
-# #new_song.play_song(tense_list, medium)
-#
-# gunshot = CreateSound('gunshot.wav')
-# #gunshot.play_song(custom, gunshot_speed)
-#
-# walking_instance = CreateSound('walking.wav')
-# #walking_instance.play_song(walking_list, medium)
-#
-# raptor_dead = CreateSound('rapgrowldead.wav')
-# #raptor_dead.play_song(growl_dead, growl)
-#
-# raptor_alive = CreateSound('rapalive.wav')
-# #raptor_alive.play_song(growl_alive, growl)
-#
-# equip = CreateSound('equip.wav')
-# #equip.play_song(equip_list, equip_speed)
+#equip = CreateSound('equip.wav')
+#equip.play_song(equip_list, equip_speed)
 #
 # overloard_roar = CreateSound('overlordroar.wav')
-# #overloard_roar.play_song(roar, growl)
+# overloard_roar.play_song(roar, growl)
+#
+# headphone_killer = CreateSound('fubar.wav')
+# headphone_killer.sound_envelope(custom_note(80), slow)
+# winsound.PlaySound(headphone_killer.name, winsound.SND_FILENAME)
+#
+#
+# new_song = CreateSound('newsong.wav')
+# new_song.play_song(tense_list, quick)
+# new_song.play_song(tense_list, medium)
+#
+# gunshot = CreateSound('gunshot.wav')
+# gunshot.play_song(custom, gunshot_speed)
+#
+# walking_instance = CreateSound('walking.wav')
+# walking_instance.play_song(walking_list, medium)
+#
+# raptor_dead = CreateSound('rapgrowldead.wav')
+# raptor_dead.play_song(growl_dead, growl)
+#
+# raptor_alive = CreateSound('rapalive.wav')
+# raptor_alive.play_song(growl_alive, growl)
+#
+# equip = CreateSound('equip.wav')
+# equip.play_song(equip_list, equip_speed)
+#
+# overloard_roar = CreateSound('overlordroar.wav')
+# overloard_roar.play_song(roar, growl)
 #
 # headphone_killer = CreateSound('fubar.wav')
 # headphone_killer.sound_envelope(custom_note(80), slow)
@@ -292,20 +330,17 @@ raptor_dead = CreateSound('rapgrowldead.wav')
 
 raptor_alive = CreateSound('rapalive.wav')
 #raptor_alive.play_song(growl_alive, growl)
+# winsound.PlaySound(headphone_killer.name, winsound.SND_FILENAME)
+#
+make_Sound.write_file(create_sound.half(create_sound.Teleport()),"teleport1.wav")
+make_Sound.write_file(create_sound.Teleport(),"teleport.wav")
+make_Sound.write_file(create_sound.white_noise(), 'white_noise.wav')
+make_Sound.write_file(create_sound.double(create_sound.Teleport()), 'teleport2.wav')
+make_Sound.write_file(create_sound.additive(create_sound.Teleport(),
+                                            create_sound.double(create_sound.Teleport())),
+                                            'teleport3.wav')
 
-equip = CreateSound('equip.wav')
-#equip.play_song(equip_list, equip_speed)
-
-overloard_roar = CreateSound('overlordroar.wav')
-overloard_roar.play_song(roar, growl)
-
-headphone_killer = CreateSound('fubar.wav')
-headphone_killer.sound_envelope(custom_note(80), slow)
-#winsound.PlaySound(headphone_killer.name, winsound.SND_FILENAME)
-
-
-# make_Sound.write_file(create_sound.half(create_sound.Teleport()),"teleport1.wav")
-# make_Sound.write_file(create_sound.Teleport(),"teleport.wav")
-# make_Sound.write_file(create_sound.white_noise(), 'white_noise.wav')
-# make_Sound.write_file(create_sound.double(create_sound.Teleport()), 'teleport2.wav')
+#make_Sound.write_file(create_sound.additive(LoadSound('teleport.wav').read_file(),
+                                            #LoadSound('teleport1.wav').read_file()), 'new2.wav')
 make_Sound.write_file(create_sound.echo_two(noob.read_file()), "philisgay.wav")
+
