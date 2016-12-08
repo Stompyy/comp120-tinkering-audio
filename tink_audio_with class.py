@@ -307,11 +307,16 @@ make_Sound.write_file(create_sound.additive(create_sound.Teleport(),
                                             create_sound.double(create_sound.Teleport())),
                                             'teleport3.wav')
 
-make_Sound.write_file(create_sound.additive(LoadSound('teleport.wav').read_file(),
-                                            LoadSound('teleport1.wav').read_file()), 'new2.wav')
+
+instance1 = LoadSound('teleport.wav')
+instance2 = LoadSound('teleport1.wav')
+new_meh = CreateSound('new_meh.wav')
+
+make_Sound.write_file(new_meh.additive(instance1.read_file(),
+                                            instance2.read_file()), 'new_meh.wav')
 
 
 
-winsound.PlaySound('new2.wav', winsound.SND_FILENAME)
+#winsound.PlaySound('new2.wav', winsound.SND_FILENAME)
 #winsound.PlaySound('teleport2.wav', winsound.SND_FILENAME)
 #winsound.PlaySound('teleport3.wav', winsound.SND_FILENAME)
