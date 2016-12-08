@@ -110,6 +110,22 @@ class Sound:
             clamped_list.append(i * multiplier)
         return clamped_list
 
+    def additive(self, list_one, list_two):
+        """Trying to add to waves together..."""
+        overlapped_list = []
+
+        # gets the shortest list length so doesn't go list out of bounds error
+        if len(list_one) < len(list_two):
+            overlapped_list_length = len(list_one)
+        else:
+            overlapped_list_length = len(list_two)
+
+        # adds them before normalising result
+        for i in xrange(0, overlapped_list_length):
+            overlapped_list.append(list_one[i] + list_two[i])
+
+        return self.normalise(overlapped_list)
+
 
 class LoadSound(Sound):
     """Loads a sound file of name 'name.wav' to add effects to with functions"""
@@ -195,8 +211,8 @@ class CreateSound(Sound):
         """doc string"""
         value_list = []
         for i in xrange(0, SAMPLE_LENGTH):
-            value_1 = math.sin(math.pi * FREQUENCY * 0.75 * (i / float(44100))) + math.sin(
-                math.pi / float(1.01) * FREQUENCY * 0.75 * (i / float(44100)))
+            value_1 = math.sin(math.pi * FREQUENCY * 0.75 * (i / float(SAMPLE_RATE))) + math.sin(
+                math.pi / float(1.01) * FREQUENCY * 0.75 * (i / float(SAMPLE_RATE)))
             value = (value_1 * (volume * BIT_DEPTH))
             value_list.append(value)
         return value_list
@@ -222,89 +238,77 @@ class CreateSound(Sound):
             half_list.append(list[i])
         return half_list
 
-    def additive(self, list_one, list_two):
-        """Trying to add to waves together..."""
-        overlapped_list = []
 
-        # gets the shortest list length so doesn't go list out of bounds error
-        if len(list_one) < len(list_two):
-            overlapped_list_length = len(list_one)
-        else:
-            overlapped_list_length = len(list_two)
-
-        # adds them before normalising result
-        for i in xrange(overlapped_list_length):
-            overlapped_list.append(list_one[i] + list_two[i])
-
-        return self.normalise(overlapped_list)
 
 
 make_Sound = Sound()
 create_sound = CreateSound("foo.wav")
-
-# gunshot = CreateSound('gunshot.wav')
-# gunshot.sound_envelope(custom_note(-9), gunshot_speed)
+gunshot = CreateSound('gunshot.wav')
+gunshot.sound_envelope(custom_note(-9), gunshot_speed)
 #winsound.PlaySound(new_gun.name, winsound.SND_FILENAME)
 
-# new_song = CreateSound('newsong.wav')
-# new_song.play_song(song, quick)
-# #new_song.play_song(tense_list, medium)
+#new_song = CreateSound('newsong.wav')
+#new_song.play_song(song, quick)
+#new_song.play_song(tense_list, medium)
+
+#gunshot = CreateSound('gunshot.wav')
+#gunshot.play_song(custom, gunshot_speed)
 #
-# gunshot = CreateSound('gunshot.wav')
-# #gunshot.play_song(custom, gunshot_speed)
-#
-# walking_instance = CreateSound('walking.wav')
-# #walking_instance.play_song(walking_list, medium)
-#
-# raptor_dead = CreateSound('rapgrowldead.wav')
-# #raptor_dead.play_song(growl_dead, growl)
-#
-# raptor_alive = CreateSound('rapalive.wav')
-# #raptor_alive.play_song(growl_alive, growl)
-#
-# equip = CreateSound('equip.wav')
-# #equip.play_song(equip_list, equip_speed)
+#walking_instance = CreateSound('walking.wav')
+#walking_instance.play_song(walking_list, medium)
+
+#raptor_dead = CreateSound('rapgrowldead.wav')
+#raptor_dead.play_song(growl_dead, growl)
+
+#raptor_alive = CreateSound('rapalive.wav')
+#raptor_alive.play_song(growl_alive, growl)
+
+#equip = CreateSound('equip.wav')
+#equip.play_song(equip_list, equip_speed)
 #
 # overloard_roar = CreateSound('overlordroar.wav')
-# #overloard_roar.play_song(roar, growl)
+# overloard_roar.play_song(roar, growl)
 #
 # headphone_killer = CreateSound('fubar.wav')
 # headphone_killer.sound_envelope(custom_note(80), slow)
-# #winsound.PlaySound(headphone_killer.name, winsound.SND_FILENAME)
-
-
-new_song = CreateSound('newsong.wav')
-#new_song.play_song(tense_list, quick)
-#new_song.play_song(tense_list, medium)
-
-gunshot = CreateSound('gunshot.wav')
-#gunshot.play_song(custom, gunshot_speed)
-
-walking_instance = CreateSound('walking.wav')
-#walking_instance.play_song(walking_list, medium)
-
-raptor_dead = CreateSound('rapgrowldead.wav')
-#raptor_dead.play_song(growl_dead, growl)
-
-raptor_alive = CreateSound('rapalive.wav')
-#raptor_alive.play_song(growl_alive, growl)
-
-equip = CreateSound('equip.wav')
-#equip.play_song(equip_list, equip_speed)
-
-overloard_roar = CreateSound('overlordroar.wav')
-#overloard_roar.play_song(roar, growl)
-
-headphone_killer = CreateSound('fubar.wav')
-headphone_killer.sound_envelope(custom_note(80), slow)
-#winsound.PlaySound(headphone_killer.name, winsound.SND_FILENAME)
-
-
+# winsound.PlaySound(headphone_killer.name, winsound.SND_FILENAME)
+#
+#
+# new_song = CreateSound('newsong.wav')
+# new_song.play_song(tense_list, quick)
+# new_song.play_song(tense_list, medium)
+#
+# gunshot = CreateSound('gunshot.wav')
+# gunshot.play_song(custom, gunshot_speed)
+#
+# walking_instance = CreateSound('walking.wav')
+# walking_instance.play_song(walking_list, medium)
+#
+# raptor_dead = CreateSound('rapgrowldead.wav')
+# raptor_dead.play_song(growl_dead, growl)
+#
+# raptor_alive = CreateSound('rapalive.wav')
+# raptor_alive.play_song(growl_alive, growl)
+#
+# equip = CreateSound('equip.wav')
+# equip.play_song(equip_list, equip_speed)
+#
+# overloard_roar = CreateSound('overlordroar.wav')
+# overloard_roar.play_song(roar, growl)
+#
+# headphone_killer = CreateSound('fubar.wav')
+# headphone_killer.sound_envelope(custom_note(80), slow)
+# winsound.PlaySound(headphone_killer.name, winsound.SND_FILENAME)
+#
 make_Sound.write_file(create_sound.half(create_sound.Teleport()),"teleport1.wav")
 make_Sound.write_file(create_sound.Teleport(),"teleport.wav")
 make_Sound.write_file(create_sound.white_noise(), 'white_noise.wav')
 make_Sound.write_file(create_sound.double(create_sound.Teleport()), 'teleport2.wav')
-make_Sound.write_file(create_sound.additive(
-    LoadSound('teleport1.wav').read_file(),
-    LoadSound('teleport2.wav').read_file()),
-    'woop.wav')
+
+make_Sound.write_file(create_sound.additive(create_sound.Teleport(),
+                                            create_sound.double(create_sound.Teleport())),
+                                            'teleport3.wav')
+
+#winsound.PlaySound('teleport1.wav', winsound.SND_FILENAME)
+#winsound.PlaySound('teleport2.wav', winsound.SND_FILENAME)
+winsound.PlaySound('teleport3.wav', winsound.SND_FILENAME)
