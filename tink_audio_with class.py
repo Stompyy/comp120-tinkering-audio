@@ -96,11 +96,12 @@ class LoadSound():
     def read_file(self):
         """returns an unpacked list of values of the sound wave"""
         unpacked_list = []
-        step = BIT_DEPTH / 200  # auto tune step
 
         for i in xrange(self.file.getnframes()):
             current_frame = self.file.readframes(1)
-            unpacked_frame = struct.unpack("i", current_frame)
+            # Change file_type to the format of your file (little endian etc.)
+            file_type = "<h"
+            unpacked_frame = struct.unpack(file_type, current_frame)
             unpacked_list.append(unpacked_frame[0])
         return unpacked_list
 
@@ -222,12 +223,13 @@ class CreateSound():
         """adds a reduced amplitude copy of the wave at a later point"""
         counter = 0
         new_list = []
+        delay = 10000
         for i in list:
             counter += 1
-            if counter < 10000:
+            if counter < delay:
                 value = i
             else:
-                value = i + (list[counter - 10000] * 0.4)
+                value = i + (list[counter - delay] * 0.6)
             new_list.append(value)
         return normalise(new_list)
 
@@ -260,4 +262,15 @@ def pre_made_sound_effects():
     additive_teleport.write_file(additive_teleport.additive(additive_teleport.teleport(),
                                                             additive_teleport.double(additive_teleport.teleport())))
 
-# pre_made_sound_effects()
+# Instances of Classes for experimenting with sound effects.
+
+# change name of sound to the name of the file
+load_sound = LoadSound("rapalive.wav")
+create_sound = CreateSound("gunshot_echo.wav")
+create_sound.write_file(create_sound.echo(load_sound.read_file()))
+
+
+# Remove comment to generate all of the sound effects in pre_made_sound_effects
+#pre_made_sound_effects()
+
+
