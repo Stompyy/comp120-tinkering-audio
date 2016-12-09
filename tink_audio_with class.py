@@ -50,7 +50,7 @@ roar = ['roar_1', 'roar_1', 'roar_2', 'roar_2',
         'roar_2', 'roar_2', 'growl_3', 'roar_3', ]
 equip_list = ['B', 'E']
 
-# Attack, sustain, release values
+# attack, sustain, and release values
 quickest = (0.02, 0.0, 0.02)
 quick = (0.01, 0.3, 0.01)
 medium = (0.05, 0.1, 0.2)
@@ -67,6 +67,7 @@ def custom_note(n):
 
 
 def normalise(value_list):
+    """normalises an entire list proportionately so that all values are within the correct parameters """
     multiplier = 0
     biggest_value = 0
     lowest_value = 0
@@ -108,6 +109,7 @@ class CreateSound():
     """Creates a file with name 'name' """
 
     def __init__(self, name):
+        """creates a new empty writable file"""
         self.file = wave.open(name, 'w')
         self.new_values_list = []
         self.name = name
@@ -115,12 +117,14 @@ class CreateSound():
         self.temp_values_list = []
 
     def write_file(self, values_list):
+        """writes a list of unpacked values packed into .file"""
         for value in values_list:
-            packed_value = (struct.pack("<h", value))
+            packed_value = struct.pack("<h", value)
             self.file.writeframes(packed_value)
         self.file.close()
 
     def sound_envelope(self, frequency, attack_sustain_release):
+        """crreates a basic sound envelope passing in a tuple for attack, sustain, and release"""
         self.new_values_list = []
         attack_frames = attack_sustain_release[0] * SAMPLE_RATE
         sustain_frames = attack_sustain_release[1] * SAMPLE_RATE
@@ -136,6 +140,7 @@ class CreateSound():
             else:
                 current_volume = BIT_DEPTH
 
+            # written below, 2.0 * math.pi is to convert radians
             pure_tone_frame = math.sin(frame * frequency / SAMPLE_RATE) * current_volume * 2.0 * math.pi * volume
             self.temp_values_list.append(pure_tone_frame)
 
@@ -147,14 +152,15 @@ class CreateSound():
         self.file.writeframes(''.join(self.new_values_list))
 
     def play_song(self, notes_list, attack_sustain_release):
+        """plays a list of notes using the dictionary above"""
         for note in notes_list:
             self.sound_envelope(notes[note], attack_sustain_release)
         winsound.PlaySound(self.name, winsound.SND_FILENAME)
 
     def teleport(self):
-        """doc string"""
+        """futuristic teleport sound effect for game contract"""
         value_list = []
-        for i in xrange(0, SAMPLE_LENGTH):
+        for i in xrange(SAMPLE_LENGTH):
             value_1 = math.sin(math.pi * FREQUENCY * 0.75 * (i / float(SAMPLE_RATE))) + math.sin(
                 math.pi / float(1.01) * FREQUENCY * 0.75 * (i / float(SAMPLE_RATE)))
             value = (value_1 * (volume * BIT_DEPTH))
@@ -162,28 +168,43 @@ class CreateSound():
         return value_list
 
     def white_noise(self):
-        """doc string"""
+        """gratuitous white noise effect"""
         value_list = []
-        for i in xrange(0, SAMPLE_LENGTH):
+        for i in xrange(SAMPLE_LENGTH):
             value_1 = random.randrange(-BIT_DEPTH, BIT_DEPTH)
             value_list.append(value_1)
         return value_list
 
     def double(self, list):
+        """skips every other value"""
         double_list = []
         for i in xrange(0, len(list), 2):
             double_list.append(list[i])
         return double_list
 
     def half(self, list):
+        """duplicates every successive value"""
         half_list = []
-        for i in xrange(0, len(list)):
+        for i in xrange(len(list)):
             half_list.append(list[i - 1])
             half_list.append(list[i])
         return half_list
 
+    def reverse(self, list):
+        """reverses the sound wave, as an unpacked list argument"""
+        reversed_list = []
+        for i in xrange(len(list), 0, -1):
+            reversed_list.append(list[i])
+        return reversed_list
+
+    def combine(self, list_one, list_two):
+        """adds one wave onto the end of another"""
+        for i in xrange(len(list_two)):
+            list_one.append(list_two[i])
+        return list_one
+
     def additive(self, list_one, list_two):
-        """Trying to add to waves together..."""
+        """adds two waves together"""
         overlapped_list = []
 
         # gets the shortest list length so doesn't go list out of bounds error
@@ -193,12 +214,12 @@ class CreateSound():
             overlapped_list_length = len(list_two)
 
         # adds them before normalising result
-        for i in xrange(0, overlapped_list_length):
+        for i in xrange(overlapped_list_length):
             overlapped_list.append(list_one[i] + list_two[i])
-
         return normalise(overlapped_list)
 
     def echo(self, list):
+        """adds a reduced amplitude copy of the wave at a later point"""
         counter = 0
         new_list = []
         for i in list:
