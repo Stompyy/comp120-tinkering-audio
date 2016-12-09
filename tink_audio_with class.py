@@ -270,7 +270,7 @@ create_sound = CreateSound("gunshot_echo.wav")
 create_sound.write_file(create_sound.echo(load_sound.read_file()))
 
 
-# Remove comment to generate all of the sound effects in pre_made_sound_effects
+# Remove below hash to allow function to execute to generate all of the sound effects in pre_made_sound_effects
 #pre_made_sound_effects()
 
 
